@@ -1,0 +1,236 @@
+{
+  "Nav": {
+    "comoFunciona": "Como funciona",
+    "recursos": "Recursos",
+    "planos": "Planos",
+    "faq": "FAQ",
+    "entrar": "Entrar",
+    "comecarAgora": "Começar agora"
+  },
+  "Home": {
+    "hero": {
+      "titleStart": "Seu negócio com agendamentos funcionando",
+      "titleHighlight": "24 horas por dia.",
+      "subtitle": "Deixe seus clientes escolherem o serviço, horário e profissional sem precisar trocar dezenas de mensagens no WhatsApp.",
+      "ctaPrimary": "Começar agora",
+      "ctaSecondary": "Ver demonstração",
+      "note": "Grátis para começar. Não é necessário cartão de crédito."
+    },
+    "howItWorks": {
+      "title": "Como funciona",
+      "subtitle": "Um fluxo simples, pensado para o cliente terminar o agendamento em cerca de 1 minuto.",
+      "steps": {
+        "1": { "title": "Escolhe o serviço", "desc": "O cliente acessa o link da sua empresa e escolhe o que precisa." },
+        "2": { "title": "Escolhe profissional e horário", "desc": "Só aparecem horários realmente disponíveis, sem risco de conflito." },
+        "3": { "title": "Confirma os dados", "desc": "Nome e WhatsApp — sem criar conta, sem senha, sem fricção." },
+        "4": { "title": "Pronto!", "desc": "Agendamento confirmado, com opção de enviar lembrete pelo WhatsApp." }
+      }
+    },
+    "benefits": {
+      "title": "Benefícios",
+      "items": {
+        "1": { "title": "Menos mensagens de WhatsApp", "desc": "Reduza drasticamente o tempo gasto combinando horários manualmente." },
+        "2": { "title": "Disponível 24 horas", "desc": "Seus clientes agendam a qualquer hora, mesmo fora do expediente." },
+        "3": { "title": "Zero conflitos de horário", "desc": "Validação automática impede que dois clientes reservem o mesmo horário." },
+        "4": { "title": "100% no celular", "desc": "Página pública otimizada para agendar em poucos toques." },
+        "5": { "title": "Sua equipe organizada", "desc": "Cada profissional com sua própria agenda e horários de trabalho." },
+        "6": { "title": "Você no controle", "desc": "Bloqueie horários, cadastre feriados e acompanhe tudo em um painel único." }
+      }
+    },
+    "features": {
+      "title": "Recursos completos",
+      "items": {
+        "1": "Página pública de agendamento personalizada",
+        "2": "Agenda com visualização por dia, semana e mês",
+        "3": "Cadastro ilimitado de serviços e profissionais",
+        "4": "Horários de trabalho individuais por profissional",
+        "5": "Bloqueio de horários e cadastro de feriados",
+        "6": "CRM simples de clientes com histórico completo",
+        "7": "Relatórios de faturamento e ocupação",
+        "8": "Confirmação automática via link do WhatsApp",
+        "9": "Painel multiempresa com dados totalmente isolados",
+        "10": "Pronto para múltiplas unidades e integrações futuras"
+      }
+    },
+    "audience": {
+      "title": "Para quem é o ReservaOn",
+      "items": {
+        "1": "Salões e barbearias",
+        "2": "Clínicas e consultórios",
+        "3": "Estúdios e personal trainers",
+        "4": "Estética e bem-estar"
+      }
+    },
+    "demo": {
+      "title": "Veja funcionando na prática",
+      "subtitle": "Explore a página pública de agendamento da nossa empresa de demonstração.",
+      "cta": "Abrir demonstração"
+    },
+    "plans": {
+      "title": "Planos",
+      "subtitle": "Comece grátis e evolua conforme seu negócio cresce.",
+      "free": "Grátis",
+      "perMonth": "/mês",
+      "maxProfessionals": "Até {count} profissional(is)",
+      "unlimitedProfessionals": "Profissionais ilimitados",
+      "maxAppointments": "Até {count} agendamentos/mês",
+      "unlimitedAppointments": "Agendamentos ilimitados",
+      "cta": "Começar agora",
+      "empty": "Nenhum plano configurado ainda. Configure os planos no painel do Super Admin."
+    },
+    "faq": {
+      "title": "Perguntas frequentes",
+      "items": {
+        "1": { "q": "Preciso instalar algum programa?", "a": "Não. O ReservaOn funciona 100% pelo navegador, tanto para você quanto para seus clientes." },
+        "2": { "q": "Meu cliente precisa criar uma conta para agendar?", "a": "Não. O cliente informa apenas nome e WhatsApp para confirmar o agendamento — sem senha, sem cadastro." },
+        "3": { "q": "Meus dados ficam misturados com os de outras empresas?", "a": "Não. Cada empresa tem seus dados completamente isolados dentro da plataforma (multiempresa)." },
+        "4": { "q": "Já vem integrado com WhatsApp e pagamentos?", "a": "A confirmação por link do WhatsApp já está disponível hoje. Pagamentos online e a API oficial do WhatsApp fazem parte do roadmap." }
+      }
+    },
+    "finalCta": {
+      "title": "Pronto para organizar sua agenda?",
+      "subtitle": "Crie sua conta gratuita agora e disponibilize sua página de agendamentos em minutos.",
+      "cta": "Começar agora"
+    }
+  },
+  "Footer": {
+    "description": "Agendamentos online 24 horas por dia para o seu negócio, sem depender de trocas intermináveis de mensagens.",
+    "product": {
+      "title": "Produto",
+      "comoFunciona": "Como funciona",
+      "planos": "Planos",
+      "criarConta": "Criar conta"
+    },
+    "company": {
+      "title": "Empresa",
+      "entrar": "Entrar",
+      "demo": "Ver demonstração"
+    },
+    "legal": {
+      "title": "Legal",
+      "privacidade": "Privacidade",
+      "termos": "Termos de uso"
+    },
+    "copyright": "© {year} ReservaOn. Todos os direitos reservados."
+  },
+  "Auth": {
+    "login": {
+      "metaTitle": "Entrar",
+      "title": "Entrar no ReservaOn",
+      "subtitle": "Acesse o painel da sua empresa ou sua agenda profissional.",
+      "noAccount": "Ainda não tem conta?",
+      "createAccount": "Cadastre sua empresa",
+      "email": "E-mail",
+      "password": "Senha",
+      "forgotPassword": "Esqueceu sua senha?",
+      "submit": "Entrar",
+      "submitting": "Entrando...",
+      "signupSuccess": "Conta criada com sucesso! Faça login para continuar.",
+      "passwordReset": "Senha redefinida com sucesso! Faça login com a nova senha.",
+      "companyBlocked": "O acesso desta empresa está bloqueado (assinatura pendente ou cancelada). Regularize o pagamento para voltar a usar o sistema.",
+      "invalidCredentials": "E-mail ou senha inválidos.",
+      "success": "Login realizado com sucesso!"
+    },
+    "signup": {
+      "metaTitle": "Criar conta",
+      "title": "Cadastre sua empresa",
+      "subtitle": "Comece grátis e disponibilize sua página de agendamentos em minutos.",
+      "hasAccount": "Já tem uma conta?",
+      "login": "Entrar",
+      "companyName": "Nome da empresa",
+      "ownerName": "Seu nome",
+      "email": "E-mail",
+      "whatsapp": "WhatsApp (com DDD)",
+      "city": "Cidade",
+      "state": "UF",
+      "password": "Senha",
+      "submit": "Criar minha conta grátis",
+      "submitting": "Criando conta...",
+      "termsPrefix": "Ao criar sua conta, você concorda com os",
+      "termsLink": "Termos de uso",
+      "and": "e a",
+      "privacyLink": "Política de Privacidade",
+      "genericError": "Verifique os campos e tente novamente."
+    }
+  },
+  "Booking": {
+    "steps": {
+      "service": "Serviço",
+      "professional": "Profissional",
+      "date": "Data",
+      "time": "Horário",
+      "yourData": "Seus dados",
+      "confirmation": "Confirmação"
+    },
+    "back": "Voltar",
+    "chooseService": {
+      "title": "Escolha o serviço",
+      "empty": "Nenhum serviço disponível para agendamento no momento."
+    },
+    "chooseProfessional": {
+      "title": "Escolha o profissional"
+    },
+    "chooseDate": {
+      "title": "Escolha a data",
+      "continue": "Continuar"
+    },
+    "chooseTime": {
+      "title": "Escolha o horário",
+      "loading": "Carregando horários...",
+      "empty": "Nenhum horário disponível nesta data. Escolha outra data.",
+      "continue": "Continuar"
+    },
+    "yourData": {
+      "title": "Seus dados",
+      "name": "Nome",
+      "whatsapp": "WhatsApp",
+      "email": "E-mail (opcional)",
+      "notes": "Observação (opcional)",
+      "continue": "Continuar",
+      "errorName": "Informe seu nome.",
+      "errorWhatsapp": "Informe um WhatsApp válido com DDD."
+    },
+    "confirm": {
+      "title": "Confirme seu agendamento",
+      "service": "Serviço",
+      "professional": "Profissional",
+      "date": "Data",
+      "time": "Horário",
+      "price": "Valor",
+      "submit": "Confirmar agendamento",
+      "submitting": "Confirmando..."
+    },
+    "errors": {
+      "loadSlots": "Não foi possível carregar os horários.",
+      "confirm": "Não foi possível confirmar o agendamento."
+    },
+    "waitlist": {
+      "join": "Entrar na lista de espera desse horário",
+      "joining": "Entrando na lista...",
+      "joined": "Pronto! Se esse horário abrir, avisamos você por WhatsApp."
+    }
+  },
+  "Confirmation": {
+    "title": "Agendamento confirmado!",
+    "statusLabel": "Status atual:",
+    "company": "Empresa",
+    "service": "Serviço",
+    "professional": "Profissional",
+    "date": "Data",
+    "time": "Horário",
+    "price": "Valor",
+    "includedInPackage": "Incluída no seu pacote — sem cobrança extra",
+    "address": "Endereço",
+    "whatsappButton": "Enviar confirmação pelo WhatsApp",
+    "calendarButton": "Adicionar ao calendário",
+    "newBooking": "Fazer novo agendamento"
+  },
+  "LanguageSwitcher": {
+    "label": "Idioma"
+  },
+  "CompanyPage": {
+    "notFound": "Empresa não encontrada",
+    "titleFallback": "Agendar horário — {name}",
+    "descriptionFallback": "Agende seu horário online com {name} em poucos cliques."
+  }
+}

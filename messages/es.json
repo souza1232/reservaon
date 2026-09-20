@@ -1,0 +1,236 @@
+{
+  "Nav": {
+    "comoFunciona": "Cómo funciona",
+    "recursos": "Funciones",
+    "planos": "Planes",
+    "faq": "Preguntas",
+    "entrar": "Iniciar sesión",
+    "comecarAgora": "Empezar ahora"
+  },
+  "Home": {
+    "hero": {
+      "titleStart": "Tu negocio con reservas funcionando",
+      "titleHighlight": "las 24 horas del día.",
+      "subtitle": "Deja que tus clientes elijan el servicio, horario y profesional sin tener que intercambiar decenas de mensajes por WhatsApp.",
+      "ctaPrimary": "Empezar ahora",
+      "ctaSecondary": "Ver demostración",
+      "note": "Gratis para empezar. No se requiere tarjeta de crédito."
+    },
+    "howItWorks": {
+      "title": "Cómo funciona",
+      "subtitle": "Un flujo simple, pensado para que el cliente termine de reservar en cerca de un minuto.",
+      "steps": {
+        "1": { "title": "Elige el servicio", "desc": "El cliente entra al enlace de tu negocio y elige lo que necesita." },
+        "2": { "title": "Elige profesional y horario", "desc": "Solo aparecen horarios realmente disponibles, sin riesgo de conflicto." },
+        "3": { "title": "Confirma sus datos", "desc": "Nombre y WhatsApp — sin crear cuenta, sin contraseña, sin fricción." },
+        "4": { "title": "¡Listo!", "desc": "Reserva confirmada, con opción de enviar recordatorio por WhatsApp." }
+      }
+    },
+    "benefits": {
+      "title": "Beneficios",
+      "items": {
+        "1": { "title": "Menos mensajes de WhatsApp", "desc": "Reduce drásticamente el tiempo dedicado a coordinar horarios manualmente." },
+        "2": { "title": "Disponible las 24 horas", "desc": "Tus clientes pueden reservar a cualquier hora, incluso fuera del horario de atención." },
+        "3": { "title": "Cero conflictos de horario", "desc": "La validación automática evita que dos clientes reserven el mismo horario." },
+        "4": { "title": "100% desde el celular", "desc": "Página pública optimizada para reservar en pocos toques." },
+        "5": { "title": "Tu equipo organizado", "desc": "Cada profesional con su propia agenda y horarios de trabajo." },
+        "6": { "title": "Tú tienes el control", "desc": "Bloquea horarios, registra feriados y controla todo desde un solo panel." }
+      }
+    },
+    "features": {
+      "title": "Funciones completas",
+      "items": {
+        "1": "Página pública de reservas personalizada",
+        "2": "Agenda con vista por día, semana y mes",
+        "3": "Registro ilimitado de servicios y profesionales",
+        "4": "Horarios de trabajo individuales por profesional",
+        "5": "Bloqueo de horarios y registro de feriados",
+        "6": "CRM simple de clientes con historial completo",
+        "7": "Reportes de facturación y ocupación",
+        "8": "Confirmación automática por enlace de WhatsApp",
+        "9": "Panel multiempresa con datos totalmente aislados",
+        "10": "Listo para múltiples sedes e integraciones futuras"
+      }
+    },
+    "audience": {
+      "title": "Para quién es ReservaOn",
+      "items": {
+        "1": "Salones y barberías",
+        "2": "Clínicas y consultorios",
+        "3": "Estudios y entrenadores personales",
+        "4": "Estética y bienestar"
+      }
+    },
+    "demo": {
+      "title": "Míralo funcionando en la práctica",
+      "subtitle": "Explora la página pública de reservas de nuestra empresa de demostración.",
+      "cta": "Abrir demostración"
+    },
+    "plans": {
+      "title": "Planes",
+      "subtitle": "Empieza gratis y evoluciona a medida que tu negocio crece.",
+      "free": "Gratis",
+      "perMonth": "/mes",
+      "maxProfessionals": "Hasta {count} profesional(es)",
+      "unlimitedProfessionals": "Profesionales ilimitados",
+      "maxAppointments": "Hasta {count} reservas/mes",
+      "unlimitedAppointments": "Reservas ilimitadas",
+      "cta": "Empezar ahora",
+      "empty": "Aún no hay planes configurados. Configura los planes desde el panel de Super Admin."
+    },
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "items": {
+        "1": { "q": "¿Necesito instalar algún programa?", "a": "No. ReservaOn funciona 100% desde el navegador, tanto para ti como para tus clientes." },
+        "2": { "q": "¿Mi cliente necesita crear una cuenta para reservar?", "a": "No. El cliente solo indica su nombre y WhatsApp para confirmar la reserva — sin contraseña, sin registro." },
+        "3": { "q": "¿Mis datos se mezclan con los de otras empresas?", "a": "No. Cada empresa tiene sus datos completamente aislados dentro de la plataforma (multiempresa)." },
+        "4": { "q": "¿Ya viene integrado con WhatsApp y pagos?", "a": "La confirmación por enlace de WhatsApp ya está disponible hoy. Los pagos en línea y la API oficial de WhatsApp forman parte de la hoja de ruta." }
+      }
+    },
+    "finalCta": {
+      "title": "¿Listo para organizar tu agenda?",
+      "subtitle": "Crea tu cuenta gratuita ahora y ten tu página de reservas lista en minutos.",
+      "cta": "Empezar ahora"
+    }
+  },
+  "Footer": {
+    "description": "Reservas en línea las 24 horas del día para tu negocio, sin depender de interminables intercambios de mensajes.",
+    "product": {
+      "title": "Producto",
+      "comoFunciona": "Cómo funciona",
+      "planos": "Planes",
+      "criarConta": "Crear cuenta"
+    },
+    "company": {
+      "title": "Empresa",
+      "entrar": "Iniciar sesión",
+      "demo": "Ver demostración"
+    },
+    "legal": {
+      "title": "Legal",
+      "privacidade": "Privacidad",
+      "termos": "Términos de uso"
+    },
+    "copyright": "© {year} ReservaOn. Todos los derechos reservados."
+  },
+  "Auth": {
+    "login": {
+      "metaTitle": "Iniciar sesión",
+      "title": "Inicia sesión en ReservaOn",
+      "subtitle": "Accede al panel de tu empresa o a tu agenda profesional.",
+      "noAccount": "¿Aún no tienes cuenta?",
+      "createAccount": "Registra tu empresa",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "submit": "Iniciar sesión",
+      "submitting": "Iniciando sesión...",
+      "signupSuccess": "¡Cuenta creada con éxito! Inicia sesión para continuar.",
+      "passwordReset": "¡Contraseña restablecida con éxito! Inicia sesión con tu nueva contraseña.",
+      "companyBlocked": "El acceso de esta empresa está bloqueado (suscripción pendiente o cancelada). Regulariza el pago para volver a usar el sistema.",
+      "invalidCredentials": "Correo o contraseña inválidos.",
+      "success": "¡Sesión iniciada con éxito!"
+    },
+    "signup": {
+      "metaTitle": "Crear cuenta",
+      "title": "Registra tu empresa",
+      "subtitle": "Empieza gratis y ten tu página de reservas lista en minutos.",
+      "hasAccount": "¿Ya tienes una cuenta?",
+      "login": "Iniciar sesión",
+      "companyName": "Nombre de la empresa",
+      "ownerName": "Tu nombre",
+      "email": "Correo electrónico",
+      "whatsapp": "Número de WhatsApp",
+      "city": "Ciudad",
+      "state": "Estado",
+      "password": "Contraseña",
+      "submit": "Crear mi cuenta gratis",
+      "submitting": "Creando cuenta...",
+      "termsPrefix": "Al crear tu cuenta, aceptas los",
+      "termsLink": "Términos de uso",
+      "and": "y la",
+      "privacyLink": "Política de Privacidad",
+      "genericError": "Revisa los campos e inténtalo de nuevo."
+    }
+  },
+  "Booking": {
+    "steps": {
+      "service": "Servicio",
+      "professional": "Profesional",
+      "date": "Fecha",
+      "time": "Horario",
+      "yourData": "Tus datos",
+      "confirmation": "Confirmación"
+    },
+    "back": "Volver",
+    "chooseService": {
+      "title": "Elige el servicio",
+      "empty": "No hay servicios disponibles para reservar en este momento."
+    },
+    "chooseProfessional": {
+      "title": "Elige el profesional"
+    },
+    "chooseDate": {
+      "title": "Elige la fecha",
+      "continue": "Continuar"
+    },
+    "chooseTime": {
+      "title": "Elige el horario",
+      "loading": "Cargando horarios...",
+      "empty": "No hay horarios disponibles en esta fecha. Elige otra fecha.",
+      "continue": "Continuar"
+    },
+    "yourData": {
+      "title": "Tus datos",
+      "name": "Nombre",
+      "whatsapp": "WhatsApp",
+      "email": "Correo electrónico (opcional)",
+      "notes": "Observación (opcional)",
+      "continue": "Continuar",
+      "errorName": "Indica tu nombre.",
+      "errorWhatsapp": "Indica un WhatsApp válido."
+    },
+    "confirm": {
+      "title": "Confirma tu reserva",
+      "service": "Servicio",
+      "professional": "Profesional",
+      "date": "Fecha",
+      "time": "Horario",
+      "price": "Precio",
+      "submit": "Confirmar reserva",
+      "submitting": "Confirmando..."
+    },
+    "errors": {
+      "loadSlots": "No se pudieron cargar los horarios.",
+      "confirm": "No se pudo confirmar la reserva."
+    },
+    "waitlist": {
+      "join": "Entrar en la lista de espera de este horario",
+      "joining": "Entrando en la lista...",
+      "joined": "¡Listo! Si este horario se libera, te avisamos por WhatsApp."
+    }
+  },
+  "Confirmation": {
+    "title": "¡Reserva confirmada!",
+    "statusLabel": "Estado actual:",
+    "company": "Empresa",
+    "service": "Servicio",
+    "professional": "Profesional",
+    "date": "Fecha",
+    "time": "Horario",
+    "price": "Precio",
+    "includedInPackage": "Incluida en tu paquete — sin cobro extra",
+    "address": "Dirección",
+    "whatsappButton": "Enviar confirmación por WhatsApp",
+    "calendarButton": "Añadir al calendario",
+    "newBooking": "Hacer otra reserva"
+  },
+  "LanguageSwitcher": {
+    "label": "Idioma"
+  },
+  "CompanyPage": {
+    "notFound": "Empresa no encontrada",
+    "titleFallback": "Reservar horario — {name}",
+    "descriptionFallback": "Reserva tu horario en línea con {name} en pocos clics."
+  }
+}

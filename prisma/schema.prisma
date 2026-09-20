@@ -1,0 +1,549 @@
+// ReservaOn — Prisma schema
+// Multi-tenant: every business-owned record links to Company via companyId.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  COMPANY_ADMIN
+  PROFESSIONAL
+}
+
+enum CompanyStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+  NO_SHOW
+}
+
+enum BlockScope {
+  SPECIFIC_TIME
+  PERIOD
+  FULL_DAY
+}
+
+enum NotificationEvent {
+  NEW_APPOINTMENT
+  CONFIRMATION
+  CANCELLATION
+  RESCHEDULE
+  REMINDER
+  REVIEW_REQUEST
+}
+
+enum NotificationChannel {
+  EMAIL
+  WHATSAPP
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  SKIPPED
+}
+
+model Plan {
+  id                      String  @id @default(cuid())
+  name                    String
+  slug                    String  @unique
+  priceCents              Int
+  maxProfessionals        Int? // null = unlimited
+  maxAppointmentsPerMonth Int? // null = unlimited
+  features                Json    @default("[]")
+  isActive                Boolean @default(true)
+  isDefault               Boolean @default(false)
+
+  // Preenchidos quando o plano tem cobrança real via Stripe (planos gratuitos ficam null).
+  stripeProductId String?
+  stripePriceId   String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companies     Company[]
+  subscriptions Subscription[]
+}
+
+model Company {
+  id              String        @id @default(cuid())
+  name            String
+  ownerName       String
+  email           String        @unique
+  phone           String?
+  whatsapp        String
+  cnpj            String?
+  city            String
+  state           String
+  logoUrl         String?
+  address         String?
+  description     String?
+  slug            String        @unique
+  instagram       String?
+  timezone        String        @default("America/Sao_Paulo")
+  status          CompanyStatus @default(ACTIVE)
+  seoTitle        String?
+  seoDescription  String?
+  facebookPixelId String?
+  googleReviewUrl String?
+
+  planId String?
+  plan   Plan?   @relation(fields: [planId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users            User[]
+  professionals    Professional[]
+  services         Service[]
+  customers        Customer[]
+  appointments     Appointment[]
+  workingHours     WorkingHour[]
+  blockedTimes     BlockedTime[]
+  holidays         Holiday[]
+  settings         CompanySettings?
+  subscription     Subscription?
+  notifications    Notification[]
+  waitlistEntries  WaitlistEntry[]
+  packages         Package[]
+  customerPackages CustomerPackage[]
+
+  @@index([status])
+}
+
+model CompanySettings {
+  id        String  @id @default(cuid())
+  companyId String  @unique
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  slotIntervalMinutes  Int @default(30)
+  minAdvanceMinutes    Int @default(60)
+  maxFutureDays        Int @default(60)
+  bufferBetweenMinutes Int @default(0)
+
+  notifyOnConfirmation Boolean @default(true)
+  notifyOnReminder     Boolean @default(false)
+  notifyOnCancellation Boolean @default(true)
+  notifyOnReschedule   Boolean @default(true)
+
+  waitlistEnabled          Boolean @default(false)
+  waitlistOfferWindowHours Int     @default(6)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Subscription {
+  id          String             @id @default(cuid())
+  companyId   String             @unique
+  company     Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  planId      String
+  plan        Plan               @relation(fields: [planId], references: [id])
+  status      SubscriptionStatus @default(TRIAL)
+  startDate   DateTime           @default(now())
+  renewalDate DateTime?
+  canceledAt  DateTime?
+
+  // Prepared for future Stripe / Mercado Pago integration — do not fill without real credentials.
+  externalProvider   String?
+  externalCustomerId String?
+  externalSubId      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([planId])
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         UserRole
+
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  professional        Professional?
+  passwordResetTokens PasswordResetToken[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId])
+}
+
+model Professional {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  userId String? @unique
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  name      String
+  photoUrl  String?
+  email     String?
+  phone     String?
+  specialty String?
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  services                 ServiceProfessional[]
+  workingHours             WorkingHour[]
+  blockedTimes             BlockedTime[]
+  appointments             Appointment[]
+  waitlistEntries          WaitlistEntry[]
+  googleCalendarConnection GoogleCalendarConnection?
+
+  @@index([companyId])
+}
+
+model Service {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  name            String
+  description     String?
+  priceCents      Int
+  durationMinutes Int
+  imageUrl        String?
+  isActive        Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  professionals   ServiceProfessional[]
+  appointments    Appointment[]
+  waitlistEntries WaitlistEntry[]
+  packages        Package[]
+
+  @@index([companyId])
+}
+
+model ServiceProfessional {
+  serviceId      String
+  professionalId String
+  service        Service      @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@id([serviceId, professionalId])
+  @@index([professionalId])
+}
+
+model Customer {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  name     String
+  whatsapp String
+  email    String?
+  notes    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  appointments     Appointment[]
+  waitlistEntries  WaitlistEntry[]
+  customerPackages CustomerPackage[]
+
+  @@unique([companyId, whatsapp])
+  @@index([companyId])
+}
+
+// dayOfWeek: 0 = domingo ... 6 = sábado
+// professionalId null = horário padrão da empresa; preenchido = horário específico do profissional
+model WorkingHour {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  professionalId String?
+  professional   Professional? @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  dayOfWeek Int
+  startTime String // "08:00"
+  endTime   String // "18:00"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId, dayOfWeek])
+  @@index([professionalId, dayOfWeek])
+}
+
+// scope FULL_DAY ignores startAt/endAt time portion (blocks the whole day for the given date).
+model BlockedTime {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  professionalId String?
+  professional   Professional? @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  scope   BlockScope @default(SPECIFIC_TIME)
+  startAt DateTime
+  endAt   DateTime
+  reason  String?
+
+  // Preenchido quando este bloqueio veio da sincronização com o Google
+  // Agenda (ver syncGoogleCalendarBlocks em src/lib/appointment-mutations.ts)
+  // — nulo pra bloqueios criados manualmente. Postgres permite múltiplos
+  // NULL num @@unique, então isso não afeta bloqueios manuais.
+  googleEventId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([professionalId, googleEventId])
+  @@index([companyId, startAt, endAt])
+  @@index([professionalId, startAt, endAt])
+}
+
+model Holiday {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  date        DateTime @db.Date
+  description String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([companyId, date])
+  @@index([companyId])
+}
+
+model Appointment {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id])
+
+  professionalId String
+  professional   Professional @relation(fields: [professionalId], references: [id])
+
+  startAt DateTime
+  endAt   DateTime
+
+  status     AppointmentStatus @default(PENDING)
+  notes      String?
+  priceCents Int // preço do serviço no momento do agendamento
+
+  // Preenchido quando esta sessão foi descontada de um pacote do cliente (ver Package/CustomerPackage).
+  customerPackageId String?
+  customerPackage   CustomerPackage? @relation(fields: [customerPackageId], references: [id])
+
+  // Id do evento espelhado no Google Agenda do profissional, se ele tiver
+  // conectado a conta (ver GoogleCalendarConnection e src/lib/appointment-google-sync.ts).
+  googleEventId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notifications Notification[]
+
+  // Impede duas reservas ativas no mesmo horário para o mesmo profissional.
+  // Índice parcial (ignora status CANCELED/NO_SHOW) é criado via SQL em migration separada.
+  @@index([companyId, startAt])
+  @@index([professionalId, startAt])
+  @@index([customerId])
+  @@index([customerPackageId])
+}
+
+/**
+ * Rate limiting simples e persistente (funciona entre instâncias serverless, ao contrário de memória local).
+ */
+model RateLimitHit {
+  id        String   @id @default(cuid())
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Notification {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  event   NotificationEvent
+  channel NotificationChannel
+  status  NotificationStatus  @default(PENDING)
+  payload Json?
+  error   String?
+
+  createdAt DateTime  @default(now())
+  sentAt    DateTime?
+
+  // wamid da mensagem inbound (toque de botão) que originou este registro.
+  // Serve só pra deduplicar reentregas de webhook da Meta — nunca é setado
+  // pelas notificações outbound normais.
+  whatsappMessageId String? @unique
+
+  @@index([companyId])
+  @@index([appointmentId])
+}
+
+// Token de acesso da WhatsApp Cloud API, renovado automaticamente pelo cron
+// /api/cron/whatsapp-token-refresh antes de expirar (troca de long-lived
+// token, válido por ~60 dias, via fb_exchange_token). provider é sempre
+// "whatsapp" hoje; existe só pra deixar o modelo extensível sem migração.
+model IntegrationToken {
+  id          String   @id @default(cuid())
+  provider    String   @unique
+  accessToken String
+  expiresAt   DateTime
+  updatedAt   DateTime @updatedAt
+}
+
+enum WaitlistStatus {
+  WAITING
+  OFFERED
+  CLAIMED
+  DECLINED
+  EXPIRED
+}
+
+// Fila de espera por um horário específico (companyId + serviceId +
+// professionalId + startAt) já ocupado. Quando esse exato agendamento é
+// cancelado (ver offerNextWaitlistEntry em src/lib/appointment-mutations.ts),
+// a entrada mais antiga em WAITING vira OFFERED e recebe um WhatsApp com
+// botões de confirmar/recusar (src/app/api/webhooks/whatsapp/route.ts).
+model WaitlistEntry {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  professionalId String
+  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  startAt        DateTime
+  status         WaitlistStatus @default(WAITING)
+  offerExpiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId, serviceId, professionalId, startAt, status])
+}
+
+// Modelo de pacote configurado pela empresa (ex: "10 sessões de depilação por
+// R$800") — recurso do plano pago, ver requirePaidPlan() em src/lib/guards.ts.
+// A venda em si (CustomerPackage) tira um snapshot destes valores, então
+// editar um Package depois não afeta pacotes já vendidos.
+model Package {
+  id            String   @id @default(cuid())
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  serviceId     String
+  service       Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  name          String
+  sessionsCount Int
+  priceCents    Int
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  customerPackages CustomerPackage[]
+
+  @@index([companyId])
+}
+
+// Venda de um Package para um cliente específico — a empresa registra que já
+// recebeu o pagamento por fora (ver contexto no plano técnico); o sistema só
+// controla o saldo de sessões restantes. Cada agendamento do mesmo serviço
+// desconta 1 sessão automaticamente (src/server/actions/public-booking.ts,
+// src/server/actions/appointments.ts) e cancelar devolve (appointment-mutations.ts).
+model CustomerPackage {
+  id                String   @id @default(cuid())
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customerId        String
+  customer          Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  packageId         String
+  package           Package  @relation(fields: [packageId], references: [id])
+  serviceId         String // snapshot — não muda mesmo se o modelo for editado depois
+  sessionsTotal     Int // snapshot
+  sessionsRemaining Int
+  pricePaidCents    Int // snapshot
+  purchasedAt       DateTime @default(now())
+
+  appointments Appointment[]
+
+  @@index([companyId, customerId, serviceId])
+}
+
+// Conexão OAuth de um profissional com a própria conta do Google, pra
+// sincronizar agenda nos dois sentidos (ver src/lib/appointment-google-sync.ts
+// pro envio de agendamentos como eventos, e syncGoogleCalendarBlocks em
+// src/lib/appointment-mutations.ts pra trazer eventos do Google como
+// bloqueios). Um por profissional — cada um conecta a própria conta, nunca
+// uma conta única da empresa.
+model GoogleCalendarConnection {
+  id             String       @id @default(cuid())
+  professionalId String       @unique
+  professional   Professional @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  googleAccountEmail String
+  accessToken        String
+  refreshToken       String
+  expiresAt          DateTime
+  lastSyncedAt       DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

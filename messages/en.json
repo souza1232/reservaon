@@ -1,0 +1,236 @@
+{
+  "Nav": {
+    "comoFunciona": "How it works",
+    "recursos": "Features",
+    "planos": "Pricing",
+    "faq": "FAQ",
+    "entrar": "Log in",
+    "comecarAgora": "Get started"
+  },
+  "Home": {
+    "hero": {
+      "titleStart": "Your business, taking bookings",
+      "titleHighlight": "24 hours a day.",
+      "subtitle": "Let your customers pick the service, time and professional without dozens of back-and-forth WhatsApp messages.",
+      "ctaPrimary": "Get started",
+      "ctaSecondary": "See a live demo",
+      "note": "Free to start. No credit card required."
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "A simple flow, designed so your customer finishes booking in about a minute.",
+      "steps": {
+        "1": { "title": "Picks a service", "desc": "The customer opens your business link and chooses what they need." },
+        "2": { "title": "Picks a professional and time", "desc": "Only truly available times show up — no risk of double-booking." },
+        "3": { "title": "Confirms their details", "desc": "Name and phone number — no account, no password, no friction." },
+        "4": { "title": "Done!", "desc": "Booking confirmed, with the option to send a WhatsApp reminder." }
+      }
+    },
+    "benefits": {
+      "title": "Benefits",
+      "items": {
+        "1": { "title": "Fewer WhatsApp messages", "desc": "Cut way down on time spent manually coordinating times." },
+        "2": { "title": "Available 24 hours", "desc": "Your customers can book any time, even outside business hours." },
+        "3": { "title": "Zero scheduling conflicts", "desc": "Automatic validation stops two customers from booking the same slot." },
+        "4": { "title": "100% mobile-friendly", "desc": "A public booking page optimized for a few taps." },
+        "5": { "title": "Your team, organized", "desc": "Each professional gets their own schedule and working hours." },
+        "6": { "title": "You're in control", "desc": "Block off times, add holidays and track everything from one dashboard." }
+      }
+    },
+    "features": {
+      "title": "Everything included",
+      "items": {
+        "1": "Custom public booking page",
+        "2": "Calendar with day, week and month views",
+        "3": "Unlimited services and professionals",
+        "4": "Individual working hours per professional",
+        "5": "Block off times and add holidays",
+        "6": "Simple customer CRM with full history",
+        "7": "Revenue and occupancy reports",
+        "8": "Automatic confirmation via WhatsApp link",
+        "9": "Multi-business dashboard with fully isolated data",
+        "10": "Ready for multiple locations and future integrations"
+      }
+    },
+    "audience": {
+      "title": "Who ReservaOn is for",
+      "items": {
+        "1": "Salons and barbershops",
+        "2": "Clinics and medical practices",
+        "3": "Studios and personal trainers",
+        "4": "Beauty and wellness"
+      }
+    },
+    "demo": {
+      "title": "See it in action",
+      "subtitle": "Explore the public booking page of our demo business.",
+      "cta": "Open demo"
+    },
+    "plans": {
+      "title": "Pricing",
+      "subtitle": "Start for free and upgrade as your business grows.",
+      "free": "Free",
+      "perMonth": "/month",
+      "maxProfessionals": "Up to {count} professional(s)",
+      "unlimitedProfessionals": "Unlimited professionals",
+      "maxAppointments": "Up to {count} bookings/month",
+      "unlimitedAppointments": "Unlimited bookings",
+      "cta": "Get started",
+      "empty": "No plans set up yet. Configure plans from the Super Admin dashboard."
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "items": {
+        "1": { "q": "Do I need to install anything?", "a": "No. ReservaOn runs 100% in the browser, for you and for your customers." },
+        "2": { "q": "Does my customer need to create an account to book?", "a": "No. The customer only provides their name and phone number to confirm the booking — no password, no sign-up." },
+        "3": { "q": "Is my data mixed with other businesses' data?", "a": "No. Each business has its data fully isolated within the platform (multi-tenant)." },
+        "4": { "q": "Does it already integrate with WhatsApp and payments?", "a": "WhatsApp link confirmation is available today. Online payments and the official WhatsApp API are on the roadmap." }
+      }
+    },
+    "finalCta": {
+      "title": "Ready to organize your schedule?",
+      "subtitle": "Create your free account now and have your booking page live in minutes.",
+      "cta": "Get started"
+    }
+  },
+  "Footer": {
+    "description": "Online booking, 24 hours a day, for your business — no more endless back-and-forth messages.",
+    "product": {
+      "title": "Product",
+      "comoFunciona": "How it works",
+      "planos": "Pricing",
+      "criarConta": "Create account"
+    },
+    "company": {
+      "title": "Company",
+      "entrar": "Log in",
+      "demo": "See a live demo"
+    },
+    "legal": {
+      "title": "Legal",
+      "privacidade": "Privacy",
+      "termos": "Terms of use"
+    },
+    "copyright": "© {year} ReservaOn. All rights reserved."
+  },
+  "Auth": {
+    "login": {
+      "metaTitle": "Log in",
+      "title": "Log in to ReservaOn",
+      "subtitle": "Access your business dashboard or your professional schedule.",
+      "noAccount": "Don't have an account yet?",
+      "createAccount": "Register your business",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot your password?",
+      "submit": "Log in",
+      "submitting": "Logging in...",
+      "signupSuccess": "Account created successfully! Log in to continue.",
+      "passwordReset": "Password reset successfully! Log in with your new password.",
+      "companyBlocked": "This company's access is blocked (subscription past due or canceled). Settle the payment to use the system again.",
+      "invalidCredentials": "Invalid email or password.",
+      "success": "Logged in successfully!"
+    },
+    "signup": {
+      "metaTitle": "Create account",
+      "title": "Register your business",
+      "subtitle": "Start for free and have your booking page live in minutes.",
+      "hasAccount": "Already have an account?",
+      "login": "Log in",
+      "companyName": "Business name",
+      "ownerName": "Your name",
+      "email": "Email",
+      "whatsapp": "WhatsApp number",
+      "city": "City",
+      "state": "State",
+      "password": "Password",
+      "submit": "Create my free account",
+      "submitting": "Creating account...",
+      "termsPrefix": "By creating your account, you agree to the",
+      "termsLink": "Terms of use",
+      "and": "and the",
+      "privacyLink": "Privacy Policy",
+      "genericError": "Please check the fields and try again."
+    }
+  },
+  "Booking": {
+    "steps": {
+      "service": "Service",
+      "professional": "Professional",
+      "date": "Date",
+      "time": "Time",
+      "yourData": "Your details",
+      "confirmation": "Confirmation"
+    },
+    "back": "Back",
+    "chooseService": {
+      "title": "Choose a service",
+      "empty": "No services available for booking right now."
+    },
+    "chooseProfessional": {
+      "title": "Choose a professional"
+    },
+    "chooseDate": {
+      "title": "Choose a date",
+      "continue": "Continue"
+    },
+    "chooseTime": {
+      "title": "Choose a time",
+      "loading": "Loading available times...",
+      "empty": "No times available on this date. Please choose another date.",
+      "continue": "Continue"
+    },
+    "yourData": {
+      "title": "Your details",
+      "name": "Name",
+      "whatsapp": "WhatsApp",
+      "email": "Email (optional)",
+      "notes": "Notes (optional)",
+      "continue": "Continue",
+      "errorName": "Please enter your name.",
+      "errorWhatsapp": "Please enter a valid WhatsApp number."
+    },
+    "confirm": {
+      "title": "Confirm your booking",
+      "service": "Service",
+      "professional": "Professional",
+      "date": "Date",
+      "time": "Time",
+      "price": "Price",
+      "submit": "Confirm booking",
+      "submitting": "Confirming..."
+    },
+    "errors": {
+      "loadSlots": "Couldn't load available times.",
+      "confirm": "Couldn't confirm the booking."
+    },
+    "waitlist": {
+      "join": "Join the waitlist for this time",
+      "joining": "Joining waitlist...",
+      "joined": "Done! If this slot opens up, we'll message you on WhatsApp."
+    }
+  },
+  "Confirmation": {
+    "title": "Booking confirmed!",
+    "statusLabel": "Current status:",
+    "company": "Business",
+    "service": "Service",
+    "professional": "Professional",
+    "date": "Date",
+    "time": "Time",
+    "price": "Price",
+    "includedInPackage": "Included in your package — no extra charge",
+    "address": "Address",
+    "whatsappButton": "Send confirmation via WhatsApp",
+    "calendarButton": "Add to calendar",
+    "newBooking": "Book again"
+  },
+  "LanguageSwitcher": {
+    "label": "Language"
+  },
+  "CompanyPage": {
+    "notFound": "Business not found",
+    "titleFallback": "Book an appointment — {name}",
+    "descriptionFallback": "Book your appointment online with {name} in just a few clicks."
+  }
+}
