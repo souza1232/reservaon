@@ -31,7 +31,7 @@ Auditoria completa feita; os 3 pontos de risco "Alto" já corrigidos e no ar:
 ### 4. Lista de espera automática
 - Cliente que não consegue um horário pode entrar na fila; quando alguém cancela aquele horário exato, o sistema avisa o primeiro da fila por WhatsApp (botões "Quero o horário!"/"Não, obrigado"), e avança pro próximo se recusar ou não responder a tempo (varredura diária, reaproveitando o cron do lembrete — não criou cron novo)
 - Fica **desligada por padrão** por empresa — precisa ativar em Configurações → Agenda
-- ⏳ **Pendente**: template `agendamento_vaga_disponivel` ainda **nem foi submetido** pra aprovação na Meta. Texto sugerido já está pronto (perguntar ao Claude se precisar, ou ver o plano antigo no histórico da conversa anterior).
+- ⏳ **Pendente**: template `agendamento_vaga_disponivel` **já submetido** pra revisão da Meta (status **PENDING**, id `1428640439193200`). Quando aprovar, falta só setar `WHATSAPP_TEMPLATE_WAITLIST_OFFER=agendamento_vaga_disponivel` no `.env`/Vercel e reimplantar.
 
 ### 5. Pacote de sessões (recurso do plano pago)
 - Empresa cria um pacote (ex: "10 sessões de depilação por R$800") em `/painel/pacotes`, vende pro cliente na ficha dele, e cada agendamento do mesmo serviço desconta 1 sessão automaticamente (cancelar devolve o saldo; concluir/faltar consome de vez, porque o desconto acontece na hora de agendar, não de concluir)
@@ -42,7 +42,7 @@ Auditoria completa feita; os 3 pontos de risco "Alto" já corrigidos e no ar:
 ### 6. Pedido de avaliação no Google
 - Agendamento cujo horário já passou vira **CONCLUÍDO sozinho** (via cron diário — antes só acontecia se alguém clicasse manualmente no painel, então na prática quase nunca disparava nada)
 - Ao auto-concluir, dispara um pedido de avaliação por WhatsApp — só se a empresa tiver colado o próprio link de avaliação do Google em Configurações → Dados da empresa (`Company.googleReviewUrl`); sem link cadastrado, não manda nada
-- ⏳ **Pendente**: template `WHATSAPP_TEMPLATE_REVIEW_REQUEST` ainda **nem foi submetido** pra aprovação na Meta. Texto sugerido está no `.env.example`.
+- ⏳ **Pendente**: template `agendamento_pedido_avaliacao` **já submetido** pra revisão da Meta (status **PENDING**, id `1095092156231367`). Quando aprovar, falta só setar `WHATSAPP_TEMPLATE_REVIEW_REQUEST=agendamento_pedido_avaliacao` no `.env`/Vercel e reimplantar.
 - Trade-off aceito conscientemente: um no-show também vira CONCLUÍDO sozinho (a empresa pode corrigir pra "Não compareceu" manualmente depois; o pedido de avaliação já vai ter sido disparado)
 
 ### 7. Sincronização com Google Agenda
