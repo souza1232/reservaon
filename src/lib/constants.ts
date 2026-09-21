@@ -43,3 +43,12 @@ export const DEFAULT_COMPANY_SETTINGS = {
   maxFutureDays: 60,
   bufferBetweenMinutes: 0,
 };
+
+/**
+ * Dados institucionais do ReservaOn (a plataforma em si, não uma empresa
+ * cliente) — exibidos no rodapé do site e em /sobre pra dar credibilidade
+ * (CNPJ real, canal de suporte humano). Não confundir com Company.cnpj
+ * (esse aqui é o CNPJ de cada empresa cliente cadastrada).
+ */
+export const RESERVAON_SUPPORT_WHATSAPP = "73999032652";
+export const RESERVAON_CNPJ = "66.173.608/0001-26";

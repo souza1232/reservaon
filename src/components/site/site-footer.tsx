@@ -1,7 +1,12 @@
 import { getTranslations } from "next-intl/server";
 import PlainLink from "next/link";
+import { MessageCircle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { normalizeWhatsappNumber } from "@/lib/format";
+import { RESERVAON_SUPPORT_WHATSAPP, RESERVAON_CNPJ } from "@/lib/constants";
 import { Logo } from "./logo";
+
+const supportWhatsappLink = `https://wa.me/${normalizeWhatsappNumber(RESERVAON_SUPPORT_WHATSAPP)}?text=${encodeURIComponent("Olá! Preciso de ajuda com o ReservaOn.")}`;
 
 export async function SiteFooter() {
   const t = await getTranslations("Footer");
@@ -13,6 +18,15 @@ export async function SiteFooter() {
           <div className="space-y-3">
             <Logo />
             <p className="max-w-xs text-sm text-muted-foreground">{t("description")}</p>
+            <a
+              href={supportWhatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <MessageCircle className="h-4 w-4" />
+              {t("support")}
+            </a>
           </div>
           <div className="grid grid-cols-2 gap-8 text-sm sm:grid-cols-3">
             <div className="space-y-2">
@@ -29,6 +43,9 @@ export async function SiteFooter() {
             </div>
             <div className="space-y-2">
               <p className="font-medium">{t("company.title")}</p>
+              <PlainLink href="/sobre" className="block text-muted-foreground hover:text-foreground">
+                {t("company.sobre")}
+              </PlainLink>
               <Link href="/entrar" className="block text-muted-foreground hover:text-foreground">
                 {t("company.entrar")}
               </Link>
@@ -48,7 +65,7 @@ export async function SiteFooter() {
           </div>
         </div>
         <p className="mt-10 text-xs text-muted-foreground">
-          {t("copyright", { year: new Date().getFullYear() })}
+          {t("copyright", { year: new Date().getFullYear() })} · CNPJ {RESERVAON_CNPJ}
         </p>
       </div>
     </footer>

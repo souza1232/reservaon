@@ -95,6 +95,7 @@
   },
   "Footer": {
     "description": "Reservas en línea las 24 horas del día para tu negocio, sin depender de interminables intercambios de mensajes.",
+    "support": "Hablar con soporte",
     "product": {
       "title": "Producto",
       "comoFunciona": "Cómo funciona",
@@ -103,6 +104,7 @@
     },
     "company": {
       "title": "Empresa",
+      "sobre": "Sobre nosotros",
       "entrar": "Iniciar sesión",
       "demo": "Ver demostración"
     },

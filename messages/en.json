@@ -95,6 +95,7 @@
   },
   "Footer": {
     "description": "Online booking, 24 hours a day, for your business — no more endless back-and-forth messages.",
+    "support": "Talk to support",
     "product": {
       "title": "Product",
       "comoFunciona": "How it works",
@@ -103,6 +104,7 @@
     },
     "company": {
       "title": "Company",
+      "sobre": "About us",
       "entrar": "Log in",
       "demo": "See a live demo"
     },
