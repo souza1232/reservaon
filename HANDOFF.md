@@ -14,7 +14,7 @@ Tudo abaixo está **implementado, testado e publicado em produção**, exceto on
 - Confirmação, cancelamento, remarcação e lembrete via WhatsApp, tudo funcionando com token real
 - Token de acesso (60 dias) renovado **sozinho** por cron (`/api/cron/whatsapp-token-refresh`, diário) — nunca mais precisa gerar manualmente
 - **WhatsApp bidirecional**: lembrete pode vir com botões "Confirmar presença"/"Cancelar" — cliente toca e o agendamento muda sozinho, sem abrir o site
-- ⏳ **Pendente**: template `agendamento_lembrete_confirmacao` (o com botões) está **PENDING** de aprovação na Meta. Sem aprovar, o lembrete continua no formato simples de sempre (sem quebrar nada). Quando aprovar, falta só setar `WHATSAPP_TEMPLATE_REMINDER_INTERACTIVE` no `.env`/Vercel com o nome aprovado e reimplantar.
+- ✅ Template `agendamento_lembrete_confirmacao` (o com botões) foi **APROVADO** pela Meta — `WHATSAPP_TEMPLATE_REMINDER_INTERACTIVE` já setado no `.env`/Vercel e reimplantado. Lembrete com botões está ativo em produção.
 
 ### 2. Segurança
 Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco médio/baixo que restavam já foram tratados:
@@ -47,7 +47,7 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 ### 6. Pedido de avaliação no Google
 - Agendamento cujo horário já passou vira **CONCLUÍDO sozinho** (via cron diário — antes só acontecia se alguém clicasse manualmente no painel, então na prática quase nunca disparava nada)
 - Ao auto-concluir, dispara um pedido de avaliação por WhatsApp — só se a empresa tiver colado o próprio link de avaliação do Google em Configurações → Dados da empresa (`Company.googleReviewUrl`); sem link cadastrado, não manda nada
-- ⏳ **Pendente**: template `agendamento_pedido_avaliacao` **já submetido** pra revisão da Meta (status **PENDING**, id `1095092156231367`). Quando aprovar, falta só setar `WHATSAPP_TEMPLATE_REVIEW_REQUEST=agendamento_pedido_avaliacao` no `.env`/Vercel e reimplantar.
+- ⏳ **Pendente**: template `agendamento_pedido_avaliacao` **já submetido** pra revisão da Meta (status **PENDING**, id `1095092156231367`). Quando aprovar, falta só setar `WHATSAPP_TEMPLATE_REVIEW_REQUEST=agendamento_pedido_avaliacao` no `.env`/Vercel e reimplantar. ⚠️ A Meta **recategorizou de UTILITY pra MARKETING** durante a revisão (categoria original submetida foi UTILITY) — templates MARKETING custam mais por mensagem e exigem opt-in de marketing do cliente (diferente de UTILITY, que é tratado como transacional). Vale reconsiderar o texto pra tentar reclassificar como UTILITY, ou aceitar o custo maior — decisão de negócio, não técnica.
 - Trade-off aceito conscientemente: um no-show também vira CONCLUÍDO sozinho (a empresa pode corrigir pra "Não compareceu" manualmente depois; o pedido de avaliação já vai ter sido disparado)
 
 ### 7. Sincronização com Google Agenda
