@@ -2,7 +2,8 @@
 
 **Pasta do projeto:** `c:\Users\Desktop\OneDrive\Desktop\reservaoline`
 **No ar:** https://agendapro-mu-olive.vercel.app (URL técnica ainda diz "agendapro", a marca exibida é "ReservaOn")
-**Deploy:** `vercel deploy --prod --yes` direto pela CLI — sem Git remoto conectado, sem histórico de commits ainda (repo local sem nenhum commit feito).
+**Deploy:** `vercel deploy --prod --yes` direto pela CLI.
+**Git:** repositório em https://github.com/souza1232/reservaon (branch `main`), commitado e sincronizado.
 
 ## Status geral
 Tudo abaixo está **implementado, testado e publicado em produção**, exceto onde marcado "⏳ pendente". Cada funcionalidade grande foi feita com um plano técnico aprovado antes de codar — os planos ficam em `C:\Users\Desktop\.claude\plans\` (`jiggly-toasting-swing.md` = Pacote de sessões; `fancy-swimming-waffle.md` = Pedido de avaliação no Google + Sincronização com Google Agenda, nessa ordem — o mesmo arquivo foi reaproveitado pras duas por serem consecutivas na mesma sessão).
@@ -16,12 +17,16 @@ Tudo abaixo está **implementado, testado e publicado em produção**, exceto on
 - ⏳ **Pendente**: template `agendamento_lembrete_confirmacao` (o com botões) está **PENDING** de aprovação na Meta. Sem aprovar, o lembrete continua no formato simples de sempre (sem quebrar nada). Quando aprovar, falta só setar `WHATSAPP_TEMPLATE_REMINDER_INTERACTIVE` no `.env`/Vercel com o nome aprovado e reimplantar.
 
 ### 2. Segurança
-Auditoria completa feita; os 3 pontos de risco "Alto" já corrigidos e no ar:
+Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco médio/baixo que restavam já foram tratados:
 - Headers de segurança (HSTS, X-Frame-Options, etc)
 - Rate limit no login (por IP e por e-mail)
 - Link do `.ics` protegido por token assinado
 - Bloqueio automático de empresa inadimplente (Stripe/Asaas cancelado ou atrasado → `Company.status = BLOCKED` sozinho via webhook, e a sessão já logada é derrubada na próxima requisição, não só no próximo login)
-- ⏳ Pendente (risco médio/baixo, não urgente): CSP, exigir e-mail verificado, senha mínima maior que 6 caracteres, `next-auth` ainda em beta, restringir hosts de imagem.
+- **E-mail verificado obrigatório pra cadastros novos**: quem se auto-cadastra em `/cadastro` recebe um link de confirmação (`/verificar-email/[token]`, válido 24h) e não consegue entrar até confirmar. Contas já existentes foram "avozinhadas" como verificadas na migração (ninguém foi trancado pra fora); contas criadas por um admin (profissionais) ou pelo seed também já nascem verificadas. Se `EMAIL_SERVER_*` não estiver configurado, a exigência é ignorada (senão todo cadastro novo ficaria trancado pra sempre sem poder confirmar).
+- **Senha mínima 8 caracteres** em cadastro e redefinição (login continua aceitando 6+, pra não bloquear quem já tem conta com senha mais curta).
+- **CSP em modo Report-Only**: `Content-Security-Policy-Report-Only` já no ar (`next.config.ts`), violações caem em `/api/csp-report` (log do servidor, visível na Vercel). Nada é bloqueado ainda de propósito — depois de um tempo sem achar nada inesperado nos logs, trocar pra `Content-Security-Policy` de verdade (só isso, a política já foi calculada considerando tudo que a aplicação carrega hoje: Facebook Pixel é o único script externo real).
+- `next-auth`: **não tinha o que fazer** — `5.0.0-beta.32` (a versão já instalada) é a versão mais recente publicada; a lib ainda não tem release estável. Reavaliar quando sair uma versão `5.x` não-beta.
+- Hosts de imagem: **mantido como está** de propósito — restringir a uma lista fixa quebraria empresas colando o link do próprio logo de qualquer lugar (não há vulnerabilidade real aqui, o Next.js já faz proxy seguro de qualquer imagem https).
 
 ### 3. Cobrança da assinatura da plataforma (empresa paga a gente)
 - **Stripe**: código pronto, mas **as chaves nunca foram preenchidas** (`STRIPE_SECRET_KEY` etc vazias) — decisão consciente de deixar "pro final".
@@ -66,8 +71,8 @@ local costuma continuar funcionando (`vercel env ls`, `vercel deploy`)
 mesmo sem o MCP.
 
 ## Detalhes técnicos que valem lembrar
-- Não existe commit Git nenhum neste repositório — todo o histórico de
-  decisões está só nesta conversa (e agora, resumido aqui).
+- Repositório Git em https://github.com/souza1232/reservaon (branch `main`) —
+  commitar e dar push quando pedido explicitamente (não é automático).
 - `.npmrc` tem `legacy-peer-deps=true` (necessário, não mexer).
 - `src/auth.config.ts` (leve, roda no Edge/middleware) vs `src/auth.ts`
   (completo, roda em Node) — separados por limite de tamanho do Edge Runtime.

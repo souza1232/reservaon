@@ -178,17 +178,23 @@ model Subscription {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String
-  role         UserRole
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  role          UserRole
+  // Preenchido quando o e-mail foi confirmado. Só é exigido pra login de
+  // quem se auto-cadastrou publicamente (signupCompanyAction) — contas
+  // criadas por um admin (profissional) ou pelo seed já nascem verificadas,
+  // porque já foram vouched por alguém autenticado. Ver src/auth.ts.
+  emailVerified DateTime?
 
   companyId String?
   company   Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  professional        Professional?
-  passwordResetTokens PasswordResetToken[]
+  professional            Professional?
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -395,6 +401,21 @@ model RateLimitHit {
 }
 
 model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// Mesmo padrão de PasswordResetToken — token de confirmação de e-mail
+// enviado no cadastro público (ver signupCompanyAction em
+// src/server/actions/auth.ts e verifyEmailAction).
+model EmailVerificationToken {
   id        String    @id @default(cuid())
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)

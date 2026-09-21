@@ -45,7 +45,7 @@ export function SignupForm() {
       return;
     }
 
-    router.push("/entrar?cadastro=sucesso");
+    router.push(result.data?.verificationEmailSent ? "/entrar?cadastro=verificar" : "/entrar?cadastro=sucesso");
   }
 
   return (

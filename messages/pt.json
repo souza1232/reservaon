@@ -126,9 +126,14 @@
       "submit": "Entrar",
       "submitting": "Entrando...",
       "signupSuccess": "Conta criada com sucesso! Faça login para continuar.",
+      "signupVerifyEmail": "Conta criada! Enviamos um link de confirmação para o seu e-mail — clique nele antes de entrar.",
+      "emailVerified": "E-mail confirmado com sucesso! Faça login para continuar.",
       "passwordReset": "Senha redefinida com sucesso! Faça login com a nova senha.",
       "companyBlocked": "O acesso desta empresa está bloqueado (assinatura pendente ou cancelada). Regularize o pagamento para voltar a usar o sistema.",
       "invalidCredentials": "E-mail ou senha inválidos.",
+      "resendVerification": "Não confirmou seu e-mail ainda? Reenviar link de confirmação",
+      "resendVerificationSending": "Enviando...",
+      "resendVerificationSent": "Se sua conta ainda não foi confirmada, reenviamos o link.",
       "success": "Login realizado com sucesso!"
     },
     "signup": {

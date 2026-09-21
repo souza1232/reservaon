@@ -126,9 +126,14 @@
       "submit": "Log in",
       "submitting": "Logging in...",
       "signupSuccess": "Account created successfully! Log in to continue.",
+      "signupVerifyEmail": "Account created! We sent a confirmation link to your email — click it before logging in.",
+      "emailVerified": "Email confirmed successfully! Log in to continue.",
       "passwordReset": "Password reset successfully! Log in with your new password.",
       "companyBlocked": "This company's access is blocked (subscription past due or canceled). Settle the payment to use the system again.",
       "invalidCredentials": "Invalid email or password.",
+      "resendVerification": "Haven't confirmed your email yet? Resend confirmation link",
+      "resendVerificationSending": "Sending...",
+      "resendVerificationSent": "If your account isn't confirmed yet, we resent the link.",
       "success": "Logged in successfully!"
     },
     "signup": {

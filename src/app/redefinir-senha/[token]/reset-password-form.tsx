@@ -6,14 +6,13 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { resetPasswordAction } from "@/server/actions/auth";
+import { resetPasswordSchema } from "@/lib/validations/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const formSchema = z.object({
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres."),
-});
+const formSchema = resetPasswordSchema.pick({ password: true });
 type FormInput = z.infer<typeof formSchema>;
 
 export function ResetPasswordForm({ token }: { token: string }) {

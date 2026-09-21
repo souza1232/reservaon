@@ -81,6 +81,7 @@ async function main() {
       email: "admin@reservaon.com",
       passwordHash,
       role: "SUPER_ADMIN",
+      emailVerified: new Date(),
     },
   });
 
@@ -142,6 +143,7 @@ async function main() {
       passwordHash,
       role: "COMPANY_ADMIN",
       companyId: company.id,
+      emailVerified: new Date(),
     },
   });
 
@@ -169,6 +171,7 @@ async function main() {
       passwordHash,
       role: "PROFESSIONAL",
       companyId: company.id,
+      emailVerified: new Date(),
     },
   });
 

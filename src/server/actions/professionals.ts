@@ -41,6 +41,9 @@ export async function createProfessionalAction(
         passwordHash,
         role: "PROFESSIONAL",
         companyId: session.user.companyId,
+        // Já nasce verificado — foi criado por um admin autenticado, não
+        // por autocadastro público (ver src/auth.ts).
+        emailVerified: new Date(),
       },
     });
     userId = user.id;

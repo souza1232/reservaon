@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { loginSchema } from "@/lib/validations/auth";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { isEmailConfigured } from "@/lib/email";
 import { authConfig } from "./auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -51,6 +52,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           });
           if (!company || company.status === "BLOCKED") return null;
         }
+
+        // Mesmo padrão acima: bloqueia login de quem se auto-cadastrou
+        // publicamente (signupCompanyAction) e ainda não confirmou o
+        // e-mail. Contas criadas por um admin (profissional) ou pelo seed
+        // já nascem com emailVerified preenchido — nunca ficam presas
+        // aqui. Se o e-mail não estiver configurado nesta instalação,
+        // ninguém consegue confirmar de qualquer forma, então não bloqueia
+        // (senão todo cadastro novo ficaria trancado pra sempre).
+        if (!user.emailVerified && isEmailConfigured()) return null;
 
         return {
           id: user.id,

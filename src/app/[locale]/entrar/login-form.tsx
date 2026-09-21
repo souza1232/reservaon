@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
+import { resendVerificationEmailAction } from "@/server/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,15 +19,19 @@ export function LoginForm() {
   const t = useTranslations("Auth.login");
   const [serverError, setServerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const cadastroSucesso = searchParams.get("cadastro") === "sucesso";
+  const cadastroVerificar = searchParams.get("cadastro") === "verificar";
   const senhaRedefinida = searchParams.get("senha") === "redefinida";
+  const emailVerificado = searchParams.get("email") === "verificado";
   const empresaBloqueada = searchParams.get("motivo") === "bloqueado";
 
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
 
@@ -55,11 +60,29 @@ export function LoginForm() {
     }
   }
 
+  async function handleResendVerification(email: string) {
+    if (!email) return;
+    setResending(true);
+    await resendVerificationEmailAction({ email });
+    setResending(false);
+    toast.success(t("resendVerificationSent"));
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {cadastroSucesso && (
         <Alert>
           <AlertDescription>{t("signupSuccess")}</AlertDescription>
+        </Alert>
+      )}
+      {cadastroVerificar && (
+        <Alert>
+          <AlertDescription>{t("signupVerifyEmail")}</AlertDescription>
+        </Alert>
+      )}
+      {emailVerificado && (
+        <Alert>
+          <AlertDescription>{t("emailVerified")}</AlertDescription>
         </Alert>
       )}
       {senhaRedefinida && (
@@ -74,7 +97,18 @@ export function LoginForm() {
       )}
       {serverError && (
         <Alert variant="destructive">
-          <AlertDescription>{serverError}</AlertDescription>
+          <AlertDescription className="space-y-1">
+            <p>{serverError}</p>
+            <Button
+              type="button"
+              variant="link"
+              className="h-auto p-0 text-destructive underline"
+              disabled={resending}
+              onClick={() => handleResendVerification(getValues("email"))}
+            >
+              {resending ? t("resendVerificationSending") : t("resendVerification")}
+            </Button>
+          </AlertDescription>
         </Alert>
       )}
 
