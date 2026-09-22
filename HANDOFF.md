@@ -36,7 +36,7 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 ### 4. Lista de espera automática
 - Cliente que não consegue um horário pode entrar na fila; quando alguém cancela aquele horário exato, o sistema avisa o primeiro da fila por WhatsApp (botões "Quero o horário!"/"Não, obrigado"), e avança pro próximo se recusar ou não responder a tempo (varredura diária, reaproveitando o cron do lembrete — não criou cron novo)
 - Fica **desligada por padrão** por empresa — precisa ativar em Configurações → Agenda
-- ⏳ **Pendente**: template `agendamento_vaga_disponivel` **já submetido** pra revisão da Meta (status **PENDING**, id `1428640439193200`). Quando aprovar, falta só setar `WHATSAPP_TEMPLATE_WAITLIST_OFFER=agendamento_vaga_disponivel` no `.env`/Vercel e reimplantar.
+- ✅ Template `agendamento_vaga_disponivel` foi **APROVADO** pela Meta — `WHATSAPP_TEMPLATE_WAITLIST_OFFER` já setado no `.env`/Vercel e reimplantado. Ativo em produção.
 
 ### 5. Pacote de sessões (recurso do plano pago)
 - Empresa cria um pacote (ex: "10 sessões de depilação por R$800") em `/painel/pacotes`, vende pro cliente na ficha dele, e cada agendamento do mesmo serviço desconta 1 sessão automaticamente (cancelar devolve o saldo; concluir/faltar consome de vez, porque o desconto acontece na hora de agendar, não de concluir)
@@ -47,7 +47,7 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 ### 6. Pedido de avaliação no Google
 - Agendamento cujo horário já passou vira **CONCLUÍDO sozinho** (via cron diário — antes só acontecia se alguém clicasse manualmente no painel, então na prática quase nunca disparava nada)
 - Ao auto-concluir, dispara um pedido de avaliação por WhatsApp — só se a empresa tiver colado o próprio link de avaliação do Google em Configurações → Dados da empresa (`Company.googleReviewUrl`); sem link cadastrado, não manda nada
-- ⏳ **Pendente**: template `agendamento_pedido_avaliacao` **já submetido** pra revisão da Meta (status **PENDING**, id `1095092156231367`). Quando aprovar, falta só setar `WHATSAPP_TEMPLATE_REVIEW_REQUEST=agendamento_pedido_avaliacao` no `.env`/Vercel e reimplantar. ⚠️ A Meta **recategorizou de UTILITY pra MARKETING** durante a revisão (categoria original submetida foi UTILITY) — templates MARKETING custam mais por mensagem e exigem opt-in de marketing do cliente (diferente de UTILITY, que é tratado como transacional). Vale reconsiderar o texto pra tentar reclassificar como UTILITY, ou aceitar o custo maior — decisão de negócio, não técnica.
+- ✅ Template `agendamento_pedido_avaliacao` foi **APROVADO** pela Meta — `WHATSAPP_TEMPLATE_REVIEW_REQUEST` já setado no `.env`/Vercel e reimplantado. Ativo em produção. ⚠️ Ficou categorizado como **MARKETING** (não UTILITY, que foi o que submetemos) — custa mais por mensagem e exige opt-in de marketing do cliente. Vale reconsiderar o texto no futuro pra tentar reclassificar como UTILITY, se o custo incomodar — decisão de negócio, não urgente.
 - Trade-off aceito conscientemente: um no-show também vira CONCLUÍDO sozinho (a empresa pode corrigir pra "Não compareceu" manualmente depois; o pedido de avaliação já vai ter sido disparado)
 
 ### 7. Sincronização com Google Agenda
@@ -56,8 +56,14 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 - ⏳ **Pendente**: precisa criar um projeto no Google Cloud Console, ativar a Google Calendar API, configurar a tela de consentimento OAuth, e preencher `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` na Vercel (passo a passo completo no `.env.example`). Sem isso, a tela de conexão mostra "ainda não configurado" e nada quebra.
 - Limitação aceita: só profissional com login próprio (`Professional.userId` preenchido) consegue conectar — quem não tem conta de usuário fica de fora por enquanto.
 
+### 8. Página institucional e credibilidade
+- `/sobre` — missão, visão, valores e política de atendimento do ReservaOn (a plataforma, não uma empresa cliente)
+- Rodapé e `/sobre` mostram um canal de suporte real por WhatsApp (`(73) 99903-2652`) e o CNPJ (`66.173.608/0001-26`) — sinais de confiança pra quem avalia assinar
+- Linkado no rodapé em pt/en/es
+
 ## Fila de ideias discutidas (não começadas)
-8. Stripe (preencher chaves reais) — deixado pro final de propósito. Único item que sobrou da lista original.
+9. Stripe (preencher chaves reais) — deixado pro final de propósito. Único item técnico que sobrou da lista original.
+10. Prova social (depoimento de cliente real ou "X empresas usam") — combinado deixar pra quando tiver 1-2 clientes dispostos a dar depoimento; não inventar isso.
 
 ## Credenciais e acessos configurados nesta sessão
 - **Meta/WhatsApp**: App "ReservaOn" (`1607109597782704`), WABA "Broken Ads" (`1446234654089281`), número +55 73 9903-8551. Token renovado automaticamente (ver acima).
