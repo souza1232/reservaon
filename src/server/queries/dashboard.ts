@@ -6,7 +6,7 @@ import type { AppointmentStatus } from "@prisma/client";
 
 const EXCLUDED_STATUSES: AppointmentStatus[] = ["CANCELED", "NO_SHOW"];
 
-function zonedRange(now: Date, timezone: string, start: Date, end: Date) {
+export function zonedRange(now: Date, timezone: string, start: Date, end: Date) {
   const startISO = formatInTimeZone(start, timezone, "yyyy-MM-dd'T'HH:mm:ss");
   const endISO = formatInTimeZone(end, timezone, "yyyy-MM-dd'T'HH:mm:ss");
   return { start: fromZonedTime(startISO, timezone), end: fromZonedTime(endISO, timezone) };

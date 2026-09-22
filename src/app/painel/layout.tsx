@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, CalendarDays, Scissors, Users, UserCircle, Settings, CreditCard, Package } from "lucide-react";
+import { LayoutDashboard, CalendarDays, Scissors, Users, UserCircle, Settings, CreditCard, Package, BarChart3 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AppShell, type NavItem } from "@/components/dashboard/app-shell";
@@ -8,6 +8,7 @@ import { AppShell, type NavItem } from "@/components/dashboard/app-shell";
 const navItems: NavItem[] = [
   { href: "/painel", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" />, exact: true },
   { href: "/painel/agenda", label: "Agenda", icon: <CalendarDays className="h-4 w-4" /> },
+  { href: "/painel/relatorios", label: "Relatórios", icon: <BarChart3 className="h-4 w-4" /> },
   { href: "/painel/servicos", label: "Serviços", icon: <Scissors className="h-4 w-4" /> },
   { href: "/painel/pacotes", label: "Pacotes", icon: <Package className="h-4 w-4" /> },
   { href: "/painel/profissionais", label: "Profissionais", icon: <UserCircle className="h-4 w-4" /> },
