@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCentsToBRL, formatDateShort } from "@/lib/format";
@@ -54,8 +55,15 @@ export default async function ProfessionalCustomersPage() {
                     (a, b) => b.startAt.getTime() - a.startAt.getTime(),
                   )[0];
                   return (
-                    <TableRow key={customer.id}>
-                      <TableCell className="font-medium">{customer.name}</TableCell>
+                    <TableRow key={customer.id} className="cursor-pointer">
+                      <TableCell className="font-medium">
+                        <Link
+                          href={`/profissional/clientes/${customer.id}`}
+                          className="hover:underline"
+                        >
+                          {customer.name}
+                        </Link>
+                      </TableCell>
                       <TableCell>{customer.whatsapp}</TableCell>
                       <TableCell>{customer.appointments.length}</TableCell>
                       <TableCell>{last ? formatDateShort(last.startAt) : "—"}</TableCell>

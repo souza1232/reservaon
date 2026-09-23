@@ -91,3 +91,22 @@ export async function requirePaidPlan() {
   }
   return session;
 }
+
+/**
+ * Admin ou profissional da empresa (qualquer papel de tenant), e a empresa
+ * precisa estar em plano pago. Igual a requirePaidPlan, mas construído sobre
+ * requireCompanySession em vez de requireCompanyAdmin — usado por recursos
+ * que o profissional também precisa poder escrever (ex: prontuário), ao
+ * contrário de Pacotes, que é exclusivo do admin.
+ */
+export async function requirePaidPlanCompanySession() {
+  const session = await requireCompanySession();
+  const company = await prisma.company.findUnique({
+    where: { id: session.user.companyId },
+    select: { plan: { select: { priceCents: true } } },
+  });
+  if (!company?.plan || company.plan.priceCents <= 0) {
+    throw new AuthError("Este recurso está disponível apenas no plano pago.", 403);
+  }
+  return session;
+}

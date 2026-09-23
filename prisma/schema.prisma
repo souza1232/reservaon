@@ -129,6 +129,7 @@ model Company {
   waitlistEntries  WaitlistEntry[]
   packages         Package[]
   customerPackages CustomerPackage[]
+  clinicalRecords  ClinicalRecord[]
 
   @@index([status])
 }
@@ -226,6 +227,7 @@ model Professional {
   appointments             Appointment[]
   waitlistEntries          WaitlistEntry[]
   googleCalendarConnection GoogleCalendarConnection?
+  clinicalRecords          ClinicalRecord[]
 
   @@index([companyId])
 }
@@ -268,10 +270,11 @@ model Customer {
   companyId String
   company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  name     String
-  whatsapp String
-  email    String?
-  notes    String?
+  name      String
+  whatsapp  String
+  email     String?
+  notes     String?
+  allergies String? @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -279,9 +282,55 @@ model Customer {
   appointments     Appointment[]
   waitlistEntries  WaitlistEntry[]
   customerPackages CustomerPackage[]
+  clinicalRecords  ClinicalRecord[]
 
   @@unique([companyId, whatsapp])
   @@index([companyId])
+}
+
+model ClinicalRecord {
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  // Nullable porque um COMPANY_ADMIN sem linha em Professional também pode
+  // escrever um registro. authorUserId/authorName são snapshots desnormalizados
+  // pra manter a autoria legível mesmo se o profissional for removido depois.
+  authorProfessionalId String?
+  authorProfessional   Professional? @relation(fields: [authorProfessionalId], references: [id], onDelete: SetNull)
+  authorUserId         String
+  authorName           String
+
+  note String @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  photos ClinicalRecordPhoto[]
+
+  @@index([customerId, createdAt])
+  @@index([companyId])
+}
+
+model ClinicalRecordPhoto {
+  id               String         @id @default(cuid())
+  clinicalRecordId String
+  clinicalRecord   ClinicalRecord @relation(fields: [clinicalRecordId], references: [id], onDelete: Cascade)
+
+  // URL do Vercel Blob — nunca enviada direto ao cliente. Servida por
+  // /api/prontuario/foto/[photoId], que confere sessão/escopo e faz o
+  // streaming dos bytes, pra uma foto de paciente nunca virar um link
+  // público permanente (ver src/app/api/prontuario/foto/[photoId]/route.ts).
+  url         String
+  contentType String
+  label       String? // ex: "antes" / "depois"
+
+  createdAt DateTime @default(now())
+
+  @@index([clinicalRecordId])
 }
 
 // dayOfWeek: 0 = domingo ... 6 = sábado

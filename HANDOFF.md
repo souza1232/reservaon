@@ -6,7 +6,7 @@
 **Git:** repositório em https://github.com/souza1232/reservaon (branch `main`), commitado e sincronizado.
 
 ## Status geral
-Tudo abaixo está **implementado, testado e publicado em produção**, exceto onde marcado "⏳ pendente". Cada funcionalidade grande foi feita com um plano técnico aprovado antes de codar — os planos ficam em `C:\Users\Desktop\.claude\plans\` (`jiggly-toasting-swing.md` = Pacote de sessões; `fancy-swimming-waffle.md` = Pedido de avaliação no Google + Sincronização com Google Agenda, nessa ordem — o mesmo arquivo foi reaproveitado pras duas por serem consecutivas na mesma sessão).
+Tudo abaixo está **implementado, testado e publicado em produção**, exceto onde marcado "⏳ pendente". Cada funcionalidade grande foi feita com um plano técnico aprovado antes de codar — os planos ficam em `C:\Users\Desktop\.claude\plans\` (`jiggly-toasting-swing.md` = Pacote de sessões; `fancy-swimming-waffle.md` = Pedido de avaliação no Google + Sincronização com Google Agenda, nessa ordem — o mesmo arquivo foi reaproveitado pras duas por serem consecutivas na mesma sessão; `refactored-brewing-moonbeam.md` = Prontuário/histórico clínico).
 
 ## O que já está pronto e no ar
 
@@ -68,6 +68,16 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 - Clientes novos x recorrentes no período
 - `src/server/queries/reports.ts` — toda a lógica de cálculo, testada em `tests/integration/reports.test.ts`
 
+### 10. Prontuário / Histórico clínico
+- Motivação: ao avaliar criticamente o que falta pro ReservaOn convencer uma clínica renomada, o maior furo era não ter onde registrar histórico clínico do cliente (anamnese, evolução, alergias, fotos antes/depois) — só existia um campo único de "Observações" livre.
+- Empresa em **plano pago** ganha, na ficha do cliente (`/painel/clientes/[id]` e novo `/profissional/clientes/[id]`), um card de Prontuário: campo fixo de alergias/contraindicações + linha do tempo de registros (texto + fotos), com autoria e data.
+- **Quem escreve**: admin da empresa ou o profissional que já atendeu aquele cliente especificamente (reaproveita o mesmo filtro de `appointments: { some: { professionalId } }` já usado na lista de clientes do profissional) — por isso foi criado um novo guard `requirePaidPlanCompanySession` em `src/lib/guards.ts` (igual a `requirePaidPlan`, mas também permite `PROFESSIONAL`, não só admin).
+- **Fotos nunca ficam com link público exposto**: sobem pro Vercel Blob (mesma infra já usada pra logo), mas a URL fica só no banco — o cliente só recebe o id da foto e ela é servida por uma rota autenticada (`/api/prontuario/foto/[photoId]`) que confere sessão/escopo antes de fazer streaming dos bytes. Decisão tomada porque foto de paciente é dado sensível (LGPD art. 5º, II), diferente de logo.
+- **Exclusão LGPD** (`eraseCustomerDataAction`) agora também apaga de vez (não só anonimiza) todos os registros de prontuário e as fotos no Blob do cliente — diferente do histórico de agendamento, que continua só anonimizado (motivo contábil não se aplica a dado clínico).
+- Fora do escopo desta rodada, de propósito: termo de consentimento assinado digitalmente, prontuário eletrônico nível CFM, integração com convênio, multi-unidade.
+- Testado em `tests/integration/clinical-records.test.ts` (criação por admin/profissional, bloqueio de profissional que nunca atendeu o cliente, upload/leitura de foto sem vazar URL, e exclusão LGPD apagando tudo) e revisado manualmente no navegador antes de subir.
+- **Achado nessa sessão**: o Vercel Blob nunca tinha sido conectado ao projeto em produção (`BLOB_READ_WRITE_TOKEN` não existia nas env vars da Vercel) — upload de imagem (logo, foto de profissional/serviço, e agora prontuário) sempre dependeu só de colar URL manualmente, sem ninguém notar porque nada exigia upload de verdade até agora. Criado e conectado o Blob Store `reservaon-blob` via `vercel blob create-store` (ver seção de credenciais abaixo) — upload de imagem funciona de verdade em produção a partir de agora, inclusive pros campos antigos de logo/foto.
+
 ## Fila de ideias discutidas (não começadas)
 9. Stripe (preencher chaves reais) — deixado pro final de propósito. Único item técnico que sobrou da lista original.
 10. Prova social (depoimento de cliente real ou "X empresas usam") — combinado deixar pra quando tiver 1-2 clientes dispostos a dar depoimento; não inventar isso.
@@ -78,6 +88,7 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 - **Asaas produção**: conta real do usuário (CPF pessoa física, aprovada), chave Pix cadastrada, webhook registrado.
 - **Neon (banco)**: reivindicado, permanente, sem risco de expirar.
 - **Vercel**: projeto `agendapro`, time `jesus-projects-b43978a7`, deploy via CLI local já autenticada.
+- **Vercel Blob**: store `reservaon-blob` (`store_MMQKp59wnRrYYwn7`, região `iad1`, acesso público), conectado ao projeto em produção/preview/development — `BLOB_READ_WRITE_TOKEN` já injetado pela própria Vercel nas env vars. Local, o token vem por `.env.local` (`vercel env pull`, arquivo no `.gitignore`, nunca commitar).
 
 ⚠️ Se abrir uma conversa nova, essas integrações (Vercel MCP em especial, que
 caiu no meio desta sessão) podem não estar conectadas — a CLI da Vercel

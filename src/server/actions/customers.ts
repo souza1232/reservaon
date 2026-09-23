@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { requireCompanyAdmin } from "@/lib/guards";
 import { actionError, actionSuccess, type ActionResult } from "./types";
@@ -34,6 +35,23 @@ export async function eraseCustomerDataAction(customerId: string): Promise<Actio
     return actionError("Recurso não pertence à sua empresa.");
   }
 
+  // Prontuário é dado clínico sensível (LGPD art. 5º, II) sem o mesmo motivo
+  // contábil/operacional que justifica manter o histórico de agendamentos —
+  // por isso aqui é exclusão de verdade (registro + fotos no Blob), não
+  // anonimização.
+  const photos = await prisma.clinicalRecordPhoto.findMany({
+    where: { clinicalRecord: { customerId } },
+    select: { url: true },
+  });
+  await Promise.all(
+    photos.map((photo) =>
+      del(photo.url).catch(() => {
+        // Segue removendo os registros mesmo se o blob já não existir mais.
+      }),
+    ),
+  );
+  await prisma.clinicalRecord.deleteMany({ where: { customerId } });
+
   await prisma.customer.update({
     where: { id: customerId },
     data: {
@@ -41,6 +59,7 @@ export async function eraseCustomerDataAction(customerId: string): Promise<Actio
       whatsapp: `removido-${customerId}`,
       email: null,
       notes: null,
+      allergies: null,
     },
   });
 
