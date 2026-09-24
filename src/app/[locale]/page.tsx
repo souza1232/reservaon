@@ -17,7 +17,8 @@ import {
   Star,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { formatCentsToBRL } from "@/lib/format";
+import { formatCentsToBRL, normalizeWhatsappNumber } from "@/lib/format";
+import { RESERVAON_SUPPORT_WHATSAPP } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "@/i18n/navigation";
@@ -27,6 +28,8 @@ import { SiteFooter } from "@/components/site/site-footer";
 // Renderizado sob demanda (não estático): os planos exibidos são
 // configurados pelo Super Admin e podem mudar a qualquer momento.
 export const dynamic = "force-dynamic";
+
+const supportWhatsappLink = `https://wa.me/${normalizeWhatsappNumber(RESERVAON_SUPPORT_WHATSAPP)}?text=${encodeURIComponent("Olá! Tenho uma dúvida antes de criar minha conta no ReservaOn.")}`;
 
 export default async function LandingPage() {
   const [plans, t] = await Promise.all([
@@ -230,6 +233,15 @@ export default async function LandingPage() {
                 <p className="col-span-2 text-center text-sm text-muted-foreground">{t("plans.empty")}</p>
               )}
             </div>
+            <a
+              href={supportWhatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-8 flex items-center justify-center gap-1.5 text-center text-sm text-muted-foreground hover:text-foreground"
+            >
+              <MessageCircle className="h-4 w-4" />
+              {t("supportCta")}
+            </a>
           </div>
         </section>
 
@@ -256,6 +268,15 @@ export default async function LandingPage() {
             <Button size="lg" variant="secondary" className="mt-6" asChild>
               <Link href="/cadastro">{t("finalCta.cta")}</Link>
             </Button>
+            <a
+              href={supportWhatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 flex items-center justify-center gap-1.5 text-sm text-primary-foreground/80 hover:text-primary-foreground"
+            >
+              <MessageCircle className="h-4 w-4" />
+              {t("supportCta")}
+            </a>
           </div>
         </section>
       </main>
