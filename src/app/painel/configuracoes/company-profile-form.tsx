@@ -136,22 +136,6 @@ export function CompanyProfileForm({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">SEO da página pública</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="seoTitle">Título (SEO)</Label>
-            <Input id="seoTitle" {...register("seoTitle")} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="seoDescription">Descrição (SEO)</Label>
-            <Textarea id="seoDescription" rows={2} {...register("seoDescription")} />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
           <CardTitle className="text-base">Avaliação no Google</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -170,6 +154,29 @@ export function CompanyProfileForm({
               preenchido, o cliente recebe automaticamente um pedido de avaliação por WhatsApp
               depois do atendimento.
             </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="pt-2">
+        <h2 className="text-sm font-medium text-muted-foreground">Avançado / Marketing (opcional)</h2>
+        <p className="text-xs text-muted-foreground">
+          Só preencha se você já usa essas ferramentas — pode pular sem problema.
+        </p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">SEO da página pública</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="seoTitle">Título (SEO)</Label>
+            <Input id="seoTitle" {...register("seoTitle")} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="seoDescription">Descrição (SEO)</Label>
+            <Textarea id="seoDescription" rows={2} {...register("seoDescription")} />
           </div>
         </CardContent>
       </Card>

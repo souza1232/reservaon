@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isUploadConfigured } from "@/lib/upload";
@@ -37,7 +38,14 @@ export default async function CompanySettingsPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Configurações</h1>
         <p className="text-sm text-muted-foreground">
-          Página pública: /empresa/{company.slug}
+          Página pública:{" "}
+          <Link
+            href={`/empresa/${company.slug}`}
+            target="_blank"
+            className="text-primary hover:underline"
+          >
+            /empresa/{company.slug}
+          </Link>
         </p>
       </div>
       <SettingsTabs active="/painel/configuracoes" />
