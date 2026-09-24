@@ -29,12 +29,12 @@
     "benefits": {
       "title": "Benefícios",
       "items": {
-        "1": { "title": "Menos mensagens de WhatsApp", "desc": "Reduza drasticamente o tempo gasto combinando horários manualmente." },
-        "2": { "title": "Disponível 24 horas", "desc": "Seus clientes agendam a qualquer hora, mesmo fora do expediente." },
-        "3": { "title": "Zero conflitos de horário", "desc": "Validação automática impede que dois clientes reservem o mesmo horário." },
-        "4": { "title": "100% no celular", "desc": "Página pública otimizada para agendar em poucos toques." },
-        "5": { "title": "Sua equipe organizada", "desc": "Cada profissional com sua própria agenda e horários de trabalho." },
-        "6": { "title": "Você no controle", "desc": "Bloqueie horários, cadastre feriados e acompanhe tudo em um painel único." }
+        "1": { "title": "Pare de perder tempo respondendo mensagem", "desc": "Cada minuto respondendo \"tem horário?\" é um minuto a menos atendendo — e faturando." },
+        "2": { "title": "Sua agenda nunca fecha", "desc": "Cliente marca de madrugada, no fim de semana, enquanto você dorme — a venda acontece sem você precisar estar lá." },
+        "3": { "title": "Nunca mais overbooking", "desc": "Dois clientes não conseguem reservar o mesmo horário — sem confusão, sem cliente chegando achando que não tem vaga." },
+        "4": { "title": "Sem perder cliente por fricção", "desc": "Página rápida, feita pro celular — o cliente marca em menos de 1 minuto, sem baixar app nem criar conta." },
+        "5": { "title": "Cada profissional com a própria agenda", "desc": "Sem cliente marcado em cima do outro, sem depender de caderno ou grupo de WhatsApp da equipe." },
+        "6": { "title": "Veja o faturamento sem somar nada", "desc": "Relatórios prontos de faturamento, comparecimento e clientes novos — sem planilha, sem calculadora." }
       }
     },
     "features": {
@@ -63,7 +63,7 @@
     },
     "demo": {
       "title": "Veja funcionando na prática",
-      "subtitle": "Explore a página pública de agendamento da nossa empresa de demonstração.",
+      "subtitle": "Essa é a página que o seu cliente vai ver — simples, rápida, sem baixar nada. O seu painel de gestão (agenda, relatórios, clientes) você libera na hora, de graça, ao criar sua conta.",
       "cta": "Abrir demonstração"
     },
     "plans": {
@@ -84,7 +84,7 @@
         "1": { "q": "Preciso instalar algum programa?", "a": "Não. O ReservaOn funciona 100% pelo navegador, tanto para você quanto para seus clientes." },
         "2": { "q": "Meu cliente precisa criar uma conta para agendar?", "a": "Não. O cliente informa apenas nome e WhatsApp para confirmar o agendamento — sem senha, sem cadastro." },
         "3": { "q": "Meus dados ficam misturados com os de outras empresas?", "a": "Não. Cada empresa tem seus dados completamente isolados dentro da plataforma (multiempresa)." },
-        "4": { "q": "Já vem integrado com WhatsApp e pagamentos?", "a": "A confirmação por link do WhatsApp já está disponível hoje. Pagamentos online e a API oficial do WhatsApp fazem parte do roadmap." }
+        "4": { "q": "Já vem integrado com WhatsApp e pagamentos?", "a": "Sim, com o WhatsApp: confirmação, lembrete, cancelamento e lista de espera já são automáticos, direto pela API oficial — o sistema manda por você. Cobrar o cliente final na hora de agendar ainda não está pronto (faz parte do roadmap)." }
       }
     },
     "finalCta": {
