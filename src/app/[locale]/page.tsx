@@ -233,15 +233,14 @@ export default async function LandingPage() {
                 <p className="col-span-2 text-center text-sm text-muted-foreground">{t("plans.empty")}</p>
               )}
             </div>
-            <a
-              href={supportWhatsappLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-8 flex items-center justify-center gap-1.5 text-center text-sm text-muted-foreground hover:text-foreground"
-            >
-              <MessageCircle className="h-4 w-4" />
-              {t("supportCta")}
-            </a>
+            <div className="mt-10 flex justify-center">
+              <Button size="lg" variant="outline" asChild>
+                <a href={supportWhatsappLink} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  {t("supportCta")}
+                </a>
+              </Button>
+            </div>
           </div>
         </section>
 
@@ -265,18 +264,22 @@ export default async function LandingPage() {
           <div className="mx-auto max-w-3xl rounded-2xl bg-primary px-6 py-16 text-center text-primary-foreground sm:px-12">
             <h2 className="text-3xl font-bold tracking-tight">{t("finalCta.title")}</h2>
             <p className="mx-auto mt-3 max-w-lg opacity-90">{t("finalCta.subtitle")}</p>
-            <Button size="lg" variant="secondary" className="mt-6" asChild>
-              <Link href="/cadastro">{t("finalCta.cta")}</Link>
-            </Button>
-            <a
-              href={supportWhatsappLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 flex items-center justify-center gap-1.5 text-sm text-primary-foreground/80 hover:text-primary-foreground"
-            >
-              <MessageCircle className="h-4 w-4" />
-              {t("supportCta")}
-            </a>
+            <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button size="lg" variant="secondary" asChild>
+                <Link href="/cadastro">{t("finalCta.cta")}</Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-primary-foreground/40 bg-transparent text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                asChild
+              >
+                <a href={supportWhatsappLink} target="_blank" rel="noopener noreferrer">
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  {t("supportCta")}
+                </a>
+              </Button>
+            </div>
           </div>
         </section>
       </main>
