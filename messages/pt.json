@@ -9,9 +9,9 @@
   },
   "Home": {
     "hero": {
-      "titleStart": "Seu negócio com agendamentos funcionando",
-      "titleHighlight": "24 horas por dia.",
-      "subtitle": "Deixe seus clientes escolherem o serviço, horário e profissional sem precisar trocar dezenas de mensagens no WhatsApp.",
+      "titleStart": "Seu cliente ainda te manda",
+      "titleHighlight": "mensagem pra marcar horário?",
+      "subtitle": "Cada \"oi, tem horário quinta?\" que você responde é tempo que podia estar atendendo. Com o ReservaOn, o cliente marca sozinho e o sistema confirma, lembra e avisa — tudo pelo WhatsApp, sem você escrever uma palavra.",
       "ctaPrimary": "Começar agora",
       "ctaSecondary": "Ver demonstração",
       "note": "Grátis para começar. Não é necessário cartão de crédito."
