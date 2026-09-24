@@ -105,14 +105,32 @@ mesmo sem o MCP.
   (WhatsApp) usa `X-Hub-Signature-256` HMAC manual
   (`src/lib/whatsapp-webhook.ts`); Asaas usa token estático no header
   `asaas-access-token` (mais simples, sem HMAC).
-- Testes: `npx vitest run` (unitários, rápido) e
-  `RUN_DB_TESTS=true npx vitest run` (integração, banco real, ~40s) — sempre
-  rodar os dois depois de mexer em algo. A suíte de integração roda contra o
-  **mesmo Neon de produção** (não existe banco de teste separado) — os
-  arquivos limpam o que criam no `afterAll`, mas a suíte completa em
-  paralelo tem flakiness pré-existente (conflito de transação Serializable
-  sob carga concorrente, blips transitórios de conexão) que não é bug —
-  rodar o arquivo isolado sempre resolve.
+- Testes: `npx vitest run` (unitários, rápido) e **`npm run test:db`**
+  (integração, banco real) — sempre rodar os dois depois de mexer em algo.
+  ⚠️ **Não usar mais `RUN_DB_TESTS=true npx vitest run` direto** — isso roda
+  contra o Neon de **produção** de verdade, e foi exatamente isso que causou
+  um incidente real (planos de teste vazando na página pública `/planos`
+  depois de uma suíte travar antes do `afterAll` limpar — resolvido numa
+  sessão, mas não deveria poder acontecer de novo).
+  `npm run test:db` (`scripts/test-with-branch.mjs`) resolve isso: cria uma
+  **branch efêmera do Neon** (`neon branches create --parent main`, cópia
+  copy-on-write instantânea, já vem com schema/migrações/dados de produção),
+  aplica migrações pendentes nela, roda os testes, e **sempre apaga a branch
+  no final** — inclusive se os testes falharem ou o processo for morto no
+  meio (testado nos dois cenários). Aceita os mesmos argumentos do vitest:
+  `npm run test:db -- tests/integration/clinical-records.test.ts` pra rodar
+  só um arquivo. Requer a CLI `neon` instalada e autenticada (já está neste
+  ambiente) e o arquivo `.neon` na raiz (projectId).
+  - **Limitação conhecida**: rodando a suíte completa de uma vez (não um
+    arquivo isolado), 2 testes (`booking.test.ts` e `packages.test.ts`)
+    falham de forma intermitente numa branch recém-criada — mesma
+    flakiness pré-existente de sempre (conflito de transação Serializable /
+    timing), só que a branch nova, mais "fria" que o banco de produção
+    (que nunca desliga), parece deixar isso mais provável. Investigado
+    parcialmente (não é sobre paralelismo — falha até rodando em série com
+    `--no-file-parallelism`, já incluído no script); não aprofundado além
+    disso por ora. **Rodar o arquivo isolado continua 100% confiável** (é o
+    caminho recomendado quando só se mexeu numa área específica).
 - **Migração do Prisma**: `prisma migrate dev` trava neste ambiente (pede
   shadow database e dá erro de checksum mismatch, arriscando pedir reset —
   **nunca aceitar** um reset num banco com dado real). Fluxo seguro usado em
