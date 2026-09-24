@@ -10,16 +10,22 @@ import { actionError, actionSuccess, type ActionResult } from "./types";
 type CompanySession = Awaited<ReturnType<typeof requirePaidPlanCompanySession>>;
 
 /**
- * Confirma que o cliente pertence à empresa da sessão e, se quem chamou é
- * PROFESSIONAL (não COMPANY_ADMIN), que ele já atendeu esse cliente alguma
- * vez — mesmo filtro usado em /profissional/clientes pra listar clientes.
- * Sem isso um profissional poderia ler/escrever prontuário de um cliente que
- * nunca viu só por adivinhar o id.
+ * Confirma que o cliente pertence à empresa da sessão e, conforme o papel de
+ * quem chamou, aplica a checagem certa: COMPANY_ADMIN tem acesso total;
+ * PROFESSIONAL só se já atendeu esse cliente alguma vez (mesmo filtro usado
+ * em /profissional/clientes); qualquer outro papel (hoje, RECEPTIONIST) é
+ * negado de propósito — prontuário é dado clínico sensível (LGPD), fora do
+ * escopo de quem cuida da recepção. Negação explícita, não um fallthrough
+ * implícito que algum papel futuro poderia herdar sem essa decisão ter sido
+ * tomada de novo.
  */
 async function assertCustomerAccess(session: CompanySession, customerId: string) {
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
   if (!customer || customer.companyId !== session.user.companyId) {
     return null;
+  }
+  if (session.user.role === "COMPANY_ADMIN") {
+    return customer;
   }
   if (session.user.role === "PROFESSIONAL") {
     if (!session.user.professionalId) return null;
@@ -28,8 +34,9 @@ async function assertCustomerAccess(session: CompanySession, customerId: string)
       select: { id: true },
     });
     if (!treated) return null;
+    return customer;
   }
-  return customer;
+  return null;
 }
 
 function revalidateCustomerPages(customerId: string) {

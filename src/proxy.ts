@@ -17,6 +17,7 @@ const handleI18nRouting = createMiddleware(routing);
 function areaForRole(role?: string): string {
   if (role === "SUPER_ADMIN") return "/admin";
   if (role === "PROFESSIONAL") return "/profissional";
+  if (role === "RECEPTIONIST") return "/recepcao";
   if (role === "COMPANY_ADMIN") return "/painel";
   return "/entrar";
 }
@@ -38,14 +39,21 @@ export default auth((req) => {
   const isAdminArea = path.startsWith("/admin");
   const isPainelArea = path.startsWith("/painel");
   const isProfissionalArea = path.startsWith("/profissional");
+  const isRecepcaoArea = path.startsWith("/recepcao");
   const isAuthPage = path === "/entrar" || path === "/cadastro";
 
   // Áreas autenticadas: comportamento inalterado, sem passar pelo roteamento
   // de idioma do next-intl.
-  if (isAdminArea || isPainelArea || isProfissionalArea) {
+  if (isAdminArea || isPainelArea || isProfissionalArea || isRecepcaoArea) {
     if (!isLoggedIn) return NextResponse.redirect(new URL("/entrar", nextUrl));
 
-    const expectedRole = isAdminArea ? "SUPER_ADMIN" : isPainelArea ? "COMPANY_ADMIN" : "PROFESSIONAL";
+    const expectedRole = isAdminArea
+      ? "SUPER_ADMIN"
+      : isPainelArea
+        ? "COMPANY_ADMIN"
+        : isProfissionalArea
+          ? "PROFESSIONAL"
+          : "RECEPTIONIST";
     if (role !== expectedRole) {
       return NextResponse.redirect(new URL(areaForRole(role), nextUrl));
     }

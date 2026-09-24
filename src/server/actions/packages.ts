@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requirePaidPlan } from "@/lib/guards";
+import { requirePaidPlan, requirePaidPlanCompanySession } from "@/lib/guards";
 import { packageSchema } from "@/lib/validations/package";
 import { reaisToCents } from "@/lib/format";
 import { actionError, actionSuccess, type ActionResult } from "./types";
@@ -108,13 +108,15 @@ export async function deletePackageAction(packageId: string): Promise<ActionResu
  * Registra a venda de um pacote pra um cliente — a empresa já recebeu o
  * pagamento por fora (ver contexto no plano técnico). Tira um snapshot dos
  * valores atuais do Package, então editar o modelo depois não afeta vendas
- * já feitas.
+ * já feitas. Diferente de criar/editar/apagar pacote (preço/catálogo, só
+ * admin): registrar uma venda é tarefa de recepção, por isso usa o guard
+ * mais amplo (admin ou recepcionista), não requirePaidPlan.
  */
 export async function sellPackageToCustomerAction(
   customerId: string,
   packageId: string,
 ): Promise<ActionResult<{ id: string }>> {
-  const session = await requirePaidPlan();
+  const session = await requirePaidPlanCompanySession();
 
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
   if (!customer || customer.companyId !== session.user.companyId) {
@@ -139,5 +141,6 @@ export async function sellPackageToCustomerAction(
   });
 
   revalidatePath(`/painel/clientes/${customerId}`);
+  revalidatePath(`/recepcao/clientes/${customerId}`);
   return actionSuccess({ id: customerPackage.id });
 }

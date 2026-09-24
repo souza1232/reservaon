@@ -6,7 +6,7 @@
 **Git:** repositório em https://github.com/souza1232/reservaon (branch `main`), commitado e sincronizado.
 
 ## Status geral
-Tudo abaixo está **implementado, testado e publicado em produção**, exceto onde marcado "⏳ pendente". Cada funcionalidade grande foi feita com um plano técnico aprovado antes de codar — os planos ficam em `C:\Users\Desktop\.claude\plans\` (`jiggly-toasting-swing.md` = Pacote de sessões; `fancy-swimming-waffle.md` = Pedido de avaliação no Google + Sincronização com Google Agenda, nessa ordem — o mesmo arquivo foi reaproveitado pras duas por serem consecutivas na mesma sessão; `refactored-brewing-moonbeam.md` = Prontuário/histórico clínico).
+Tudo abaixo está **implementado, testado e publicado em produção**, exceto onde marcado "⏳ pendente". Cada funcionalidade grande foi feita com um plano técnico aprovado antes de codar — os planos ficam em `C:\Users\Desktop\.claude\plans\` (`jiggly-toasting-swing.md` = Pacote de sessões; `fancy-swimming-waffle.md` = Pedido de avaliação no Google + Sincronização com Google Agenda, nessa ordem — o mesmo arquivo foi reaproveitado pras duas por serem consecutivas na mesma sessão; `refactored-brewing-moonbeam.md` = Prontuário/histórico clínico e, depois, Papel de recepcionista — reaproveitado de novo por serem consecutivos na mesma sessão).
 
 ## O que já está pronto e no ar
 
@@ -77,6 +77,15 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 - Fora do escopo desta rodada, de propósito: termo de consentimento assinado digitalmente, prontuário eletrônico nível CFM, integração com convênio, multi-unidade.
 - Testado em `tests/integration/clinical-records.test.ts` (criação por admin/profissional, bloqueio de profissional que nunca atendeu o cliente, upload/leitura de foto sem vazar URL, e exclusão LGPD apagando tudo) e revisado manualmente no navegador antes de subir.
 - **Achado nessa sessão**: o Vercel Blob nunca tinha sido conectado ao projeto em produção (`BLOB_READ_WRITE_TOKEN` não existia nas env vars da Vercel) — upload de imagem (logo, foto de profissional/serviço, e agora prontuário) sempre dependeu só de colar URL manualmente, sem ninguém notar porque nada exigia upload de verdade até agora. Criado e conectado o Blob Store `reservaon-blob` via `vercel blob create-store` (ver seção de credenciais abaixo) — upload de imagem funciona de verdade em produção a partir de agora, inclusive pros campos antigos de logo/foto.
+
+### 11. Papel de recepcionista
+- Motivação: discutindo como vender pra clínica que já tem recepcionista, ficou claro que não tinha login pra ela — só dono (vê tudo, inclusive faturamento) ou profissional (só a própria agenda). Sem isso, o discurso "o sistema trabalha com sua recepcionista" não se sustentava na implantação real.
+- Novo papel `RECEPTIONIST`: vê e gerencia agenda e clientes da **empresa inteira** (todos os profissionais), mas não vê faturamento, assinatura, configurações, nem prontuário clínico.
+- **Área própria `/recepcao`**, espelhando `/profissional` — não reaproveita `/painel` de propósito: hoje toda página sob `/painel` confia cegamente no guard do layout (nenhuma tem guard próprio), então admitir recepcionista ali exigiria re-travar cada página financeira/admin uma por uma manualmente, um esquecimento vira vazamento. Com área separada, ela nunca alcança `/painel/relatorios` etc. nem digitando a URL.
+- Admin cria/remove login em **Painel → Recepcionistas** (`/painel/recepcionistas`).
+- **Correção crítica de segurança feita junto**: o guard do prontuário (`assertCustomerAccess` em `clinical-records.ts`, e a rota de foto) tinha um fallthrough implícito pra acesso total que, até então, só admin alcançava. Sem essa correção, admitir recepcionista no guard geral (`requireCompanySession`) teria liberado prontuário/foto de paciente pra ela sem nenhuma decisão de produto por trás — corrigido pra negar explicitamente.
+- Ajustes menores de guard pra recepcionista conseguir trabalhar de verdade: `updateCustomerNotesAction` (observação do cliente) e `sellPackageToCustomerAction` (vender pacote já cadastrado) passaram de admin-only pra admin+recepcionista — criar/editar/apagar pacote (preço/catálogo) continua admin-only.
+- Testado em `tests/integration/receptionist.test.ts` (agendamento cross-profissional, observação/venda de pacote funcionando, bloqueio de prontuário/faturamento/configurações/gestão de profissionais, e que só admin cria/apaga recepcionista).
 
 ## Fila de ideias discutidas (não começadas)
 9. Stripe (preencher chaves reais) — deixado pro final de propósito. Único item técnico que sobrou da lista original.

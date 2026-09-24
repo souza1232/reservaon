@@ -27,6 +27,10 @@ export async function GET(
       return NextResponse.json({ error: "Foto não encontrada." }, { status: 404 });
     }
 
+    // COMPANY_ADMIN: acesso total. PROFESSIONAL: só se já atendeu o
+    // cliente. Qualquer outro papel (RECEPTIONIST etc): negado de
+    // propósito, dado clínico é sensível — mesma lógica de
+    // assertCustomerAccess em clinical-records.ts.
     if (session.user.role === "PROFESSIONAL") {
       if (!session.user.professionalId) {
         return NextResponse.json({ error: "Foto não encontrada." }, { status: 404 });
@@ -41,6 +45,8 @@ export async function GET(
       if (!treated) {
         return NextResponse.json({ error: "Foto não encontrada." }, { status: 404 });
       }
+    } else if (session.user.role !== "COMPANY_ADMIN") {
+      return NextResponse.json({ error: "Foto não encontrada." }, { status: 404 });
     }
 
     const blobResponse = await fetch(photo.url);

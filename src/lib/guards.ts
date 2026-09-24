@@ -48,9 +48,9 @@ async function assertCompanyActive(companyId: string): Promise<void> {
   }
 }
 
-/** Admin ou profissional autenticado de uma empresa (qualquer papel de tenant). */
+/** Admin, profissional ou recepcionista autenticado de uma empresa (qualquer papel de tenant). */
 export async function requireCompanySession() {
-  const session = await requireRole(["COMPANY_ADMIN", "PROFESSIONAL"]);
+  const session = await requireRole(["COMPANY_ADMIN", "PROFESSIONAL", "RECEPTIONIST"]);
   if (!session.user.companyId) {
     throw new AuthError("Usuário sem empresa vinculada.", 403);
   }

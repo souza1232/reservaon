@@ -3,14 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { del } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
-import { requireCompanyAdmin } from "@/lib/guards";
+import { requireCompanyAdmin, requireCompanySession } from "@/lib/guards";
 import { actionError, actionSuccess, type ActionResult } from "./types";
 
+// Observação geral do cliente não é dado sensível (diferente de prontuário
+// clínico) — admin, profissional e recepcionista podem editar.
 export async function updateCustomerNotesAction(
   customerId: string,
   notes: string,
 ): Promise<ActionResult> {
-  const session = await requireCompanyAdmin();
+  const session = await requireCompanySession();
   const existing = await prisma.customer.findUnique({ where: { id: customerId } });
   if (!existing) return actionError("Cliente não encontrado.");
   if (existing.companyId !== session.user.companyId) {
@@ -19,6 +21,7 @@ export async function updateCustomerNotesAction(
 
   await prisma.customer.update({ where: { id: customerId }, data: { notes: notes || null } });
   revalidatePath(`/painel/clientes/${customerId}`);
+  revalidatePath(`/recepcao/clientes/${customerId}`);
   return actionSuccess();
 }
 
