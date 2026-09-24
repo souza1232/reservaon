@@ -26,6 +26,16 @@
         "4": { "title": "Pronto!", "desc": "Agendamento confirmado, com opção de enviar lembrete pelo WhatsApp." }
       }
     },
+    "whatsapp": {
+      "title": "O WhatsApp trabalha por você, sozinho",
+      "subtitle": "Confirmação, lembrete, lista de espera e pedido de avaliação — tudo automático, pela API oficial da Meta. Você nunca escreve essas mensagens.",
+      "steps": {
+        "1": { "title": "Confirma na hora", "desc": "Assim que o cliente agenda, ele já recebe a confirmação pelo WhatsApp — sem você responder nada." },
+        "2": { "title": "Lembra com botão", "desc": "Antes do horário chegar, um lembrete com botões de \"Confirmar\" e \"Cancelar\" — o cliente toca e o sistema atualiza sozinho." },
+        "3": { "title": "Preenche vaga cancelada", "desc": "Se alguém cancela, o próximo da lista de espera recebe a oferta do horário na hora, automaticamente." },
+        "4": { "title": "Pede avaliação depois", "desc": "Terminou o atendimento? O sistema pede a avaliação no Google pelo WhatsApp, sem você precisar lembrar." }
+      }
+    },
     "benefits": {
       "title": "Benefícios",
       "items": {
@@ -47,7 +57,7 @@
         "5": "Bloqueio de horários e cadastro de feriados",
         "6": "CRM simples de clientes com histórico completo",
         "7": "Relatórios de faturamento e ocupação",
-        "8": "Confirmação automática via link do WhatsApp",
+        "8": "Automação completa por WhatsApp (API oficial da Meta)",
         "9": "Painel multiempresa com dados totalmente isolados",
         "10": "Pronto para múltiplas unidades e integrações futuras"
       }

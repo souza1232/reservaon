@@ -11,6 +11,10 @@ import {
   Stethoscope,
   Dumbbell,
   Sparkles,
+  MessageCircle,
+  BellRing,
+  UserPlus,
+  Star,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCentsToBRL } from "@/lib/format";
@@ -32,6 +36,7 @@ export default async function LandingPage() {
 
   const benefitIcons = [MessageCircleOff, Clock, ShieldCheck, Smartphone, Users, CalendarClock] as const;
   const audienceIcons = [Scissors, Stethoscope, Dumbbell, Sparkles] as const;
+  const whatsappIcons = [MessageCircle, BellRing, UserPlus, Star] as const;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -76,6 +81,33 @@ export default async function LandingPage() {
                   <p className="mt-2 text-sm text-muted-foreground">{t(`howItWorks.steps.${step}.desc`)}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* WHATSAPP — recurso mais forte, merece seção própria em destaque */}
+        <section className="border-t py-20">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            <div className="mx-auto max-w-2xl text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366]/10">
+                <MessageCircle className="h-6 w-6 text-[#25D366]" />
+              </div>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight">{t("whatsapp.title")}</h2>
+              <p className="mt-3 text-muted-foreground">{t("whatsapp.subtitle")}</p>
+            </div>
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {(["1", "2", "3", "4"] as const).map((step, i) => {
+                const Icon = whatsappIcons[i];
+                return (
+                  <div key={step} className="rounded-xl border bg-background p-6">
+                    <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-[#25D366]/10">
+                      <Icon className="h-4 w-4 text-[#25D366]" />
+                    </div>
+                    <h3 className="font-semibold">{t(`whatsapp.steps.${step}.title`)}</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">{t(`whatsapp.steps.${step}.desc`)}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
