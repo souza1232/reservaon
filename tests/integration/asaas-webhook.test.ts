@@ -9,10 +9,10 @@ import { prisma } from "@/lib/prisma";
 const RUN = process.env.RUN_DB_TESTS === "true";
 const WEBHOOK_TOKEN = "test-asaas-webhook-token";
 
-function asaasEvent(event: string, subscriptionId: string) {
+function asaasEvent(event: string, subscriptionId: string, customerId?: string) {
   return JSON.stringify({
     event,
-    payment: { subscription: subscriptionId, dueDate: "2026-11-01" },
+    payment: { subscription: subscriptionId, customer: customerId, dueDate: "2026-11-01" },
   });
 }
 
@@ -112,6 +112,35 @@ describe.skipIf(!RUN)("Webhook do Asaas (integração com banco real)", () => {
 
     const company = await prisma.company.findUniqueOrThrow({ where: { id: companyId } });
     expect(company.status).toBe("BLOCKED");
+  });
+
+  it("checkout de cartão: acha pelo externalCustomerId e completa o externalSubId quando ainda não sabia", async () => {
+    const pending = await prisma.subscription.create({
+      data: {
+        companyId,
+        planId,
+        status: "PAST_DUE",
+        externalProvider: "asaas",
+        externalCustomerId: "cus_checkout_teste",
+        externalSubId: null,
+        externalPaymentMethod: "credit_card",
+      },
+    });
+    expect(pending.externalSubId).toBeNull();
+
+    const { POST } = await import("@/app/api/webhooks/asaas/route");
+    const response = await POST(
+      new Request("https://example.com/api/webhooks/asaas", {
+        method: "POST",
+        headers: { "asaas-access-token": WEBHOOK_TOKEN },
+        body: asaasEvent("PAYMENT_CONFIRMED", "sub_nova_do_checkout", "cus_checkout_teste"),
+      }),
+    );
+    expect(response.status).toBe(200);
+
+    const updated = await prisma.subscription.findUniqueOrThrow({ where: { companyId } });
+    expect(updated.status).toBe("ACTIVE");
+    expect(updated.externalSubId).toBe("sub_nova_do_checkout");
   });
 
   it("rejeita token inválido (400), sem alterar o banco", async () => {

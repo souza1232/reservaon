@@ -8,7 +8,7 @@ import { formatCentsToBRL, formatDateShort } from "@/lib/format";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { UpgradeButton, ManageBillingButton, AsaasPixButton } from "./billing-actions";
+import { UpgradeButton, ManageBillingButton, AsaasPixButton, AsaasCardButton } from "./billing-actions";
 
 export const metadata: Metadata = { title: "Assinatura" };
 
@@ -135,6 +135,13 @@ export default async function BillingPage({ searchParams }: PageProps) {
                       <AsaasPixButton
                         planId={plan.id}
                         label={`Assinar ${plan.name} (PIX)`}
+                        hasDocument={Boolean(company.cnpj)}
+                      />
+                    )}
+                    {asaasReady && (
+                      <AsaasCardButton
+                        planId={plan.id}
+                        label={`Assinar ${plan.name} (cartão)`}
                         hasDocument={Boolean(company.cnpj)}
                       />
                     )}

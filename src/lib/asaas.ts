@@ -111,3 +111,46 @@ interface AsaasPixQrCode {
 export async function getPixQrCode(paymentId: string): Promise<AsaasPixQrCode> {
   return asaasFetch<AsaasPixQrCode>(`/payments/${paymentId}/pixQrCode`);
 }
+
+interface AsaasCheckoutSession {
+  id: string;
+  link: string; // URL da página hospedada do Asaas pra onde o cliente é redirecionado
+}
+
+/**
+ * Cria uma sessão do Checkout hospedado do Asaas (não a API de tokenização
+ * direta) — o número do cartão é digitado na página do próprio Asaas, nunca
+ * passa pelo nosso servidor. Separada de createAsaasSubscription porque a
+ * resposta é outra forma (link de redirecionamento, não assinatura+cobrança
+ * criadas na hora) — a assinatura real só existe depois que o cliente paga,
+ * confirmada via webhook (ver src/app/api/webhooks/asaas/route.ts).
+ */
+export async function createAsaasCheckoutSession(params: {
+  customer: string;
+  value: number;
+  successUrl: string;
+  cancelUrl: string;
+  expiredUrl: string;
+}): Promise<AsaasCheckoutSession> {
+  return asaasFetch<AsaasCheckoutSession>("/checkouts", {
+    method: "POST",
+    body: JSON.stringify({
+      billingTypes: ["CREDIT_CARD"],
+      chargeTypes: ["RECURRENT"],
+      customer: params.customer,
+      subscription: {
+        cycle: "MONTHLY",
+        nextDueDate: new Date().toISOString().slice(0, 10),
+      },
+      items: [
+        { name: "Assinatura ReservaOn", description: "Assinatura ReservaOn", quantity: 1, value: params.value },
+      ],
+      callback: {
+        successUrl: params.successUrl,
+        cancelUrl: params.cancelUrl,
+        expiredUrl: params.expiredUrl,
+      },
+      minutesToExpire: 60,
+    }),
+  });
+}

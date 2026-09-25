@@ -6,7 +6,9 @@
 **Git:** repositório em https://github.com/souza1232/reservaon (branch `main`), commitado e sincronizado.
 
 ## Status geral
-Tudo abaixo está **implementado, testado e publicado em produção**, exceto onde marcado "⏳ pendente". Cada funcionalidade grande foi feita com um plano técnico aprovado antes de codar — os planos ficam em `C:\Users\Desktop\.claude\plans\` (`jiggly-toasting-swing.md` = Pacote de sessões; `fancy-swimming-waffle.md` = Pedido de avaliação no Google + Sincronização com Google Agenda, nessa ordem — o mesmo arquivo foi reaproveitado pras duas por serem consecutivas na mesma sessão; `refactored-brewing-moonbeam.md` = Prontuário/histórico clínico e, depois, Papel de recepcionista — reaproveitado de novo por serem consecutivos na mesma sessão).
+Tudo abaixo está **implementado, testado e publicado em produção**, exceto onde marcado "⏳ pendente". Cada funcionalidade grande foi feita com um plano técnico aprovado antes de codar — os planos ficam em `C:\Users\Desktop\.claude\plans\` (`jiggly-toasting-swing.md` = Pacote de sessões; `fancy-swimming-waffle.md` = Pedido de avaliação no Google + Sincronização com Google Agenda, nessa ordem — o mesmo arquivo foi reaproveitado pras duas por serem consecutivas na mesma sessão; `refactored-brewing-moonbeam.md` = Prontuário/histórico clínico, depois Papel de recepcionista, depois Checkout de cartão via Asaas — reaproveitado 3x por serem consecutivos na mesma sessão).
+
+⚠️ **Item 12 (Checkout de cartão via Asaas) está codado, testado (automatizado) e commitado, mas NÃO implantado em produção ainda** — falta o teste manual de ponta a ponta contra o Asaas (sandbox ou produção com cuidado) antes do deploy. Ver detalhes no item.
 
 ## O que já está pronto e no ar
 
@@ -86,6 +88,15 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 - **Correção crítica de segurança feita junto**: o guard do prontuário (`assertCustomerAccess` em `clinical-records.ts`, e a rota de foto) tinha um fallthrough implícito pra acesso total que, até então, só admin alcançava. Sem essa correção, admitir recepcionista no guard geral (`requireCompanySession`) teria liberado prontuário/foto de paciente pra ela sem nenhuma decisão de produto por trás — corrigido pra negar explicitamente.
 - Ajustes menores de guard pra recepcionista conseguir trabalhar de verdade: `updateCustomerNotesAction` (observação do cliente) e `sellPackageToCustomerAction` (vender pacote já cadastrado) passaram de admin-only pra admin+recepcionista — criar/editar/apagar pacote (preço/catálogo) continua admin-only.
 - Testado em `tests/integration/receptionist.test.ts` (agendamento cross-profissional, observação/venda de pacote funcionando, bloqueio de prontuário/faturamento/configurações/gestão de profissionais, e que só admin cria/apaga recepcionista).
+
+### 12. Checkout de cartão via Asaas (⚠️ codado e testado, NÃO implantado ainda)
+- Motivação: até agora só dava pra pagar a assinatura via PIX. Cogitamos ativar o Stripe (já tem código pronto, botão inativo), mas descobrimos que o produto/preço cadastrado no plano está em **modo teste** do Stripe — reativar exigiria conta/chaves live do zero. Decisão: consolidar tudo no Asaas (já ativo), que suporta cartão recorrente nativamente, em vez de mexer no Stripe.
+- Usa o **Asaas Checkout** (página hospedada do próprio Asaas) e não a API de tokenização direta — o número do cartão nunca passa pelo nosso servidor, evitando ampliar o escopo de conformidade PCI-DSS do projeto.
+- **Achado técnico que moldou o design**: o campo `externalReference` do Asaas Checkout não é propagado de forma confiável até a assinatura gerada (bug documentado, relatado por outros devs). Por isso o vínculo entre o pagamento e a empresa certa é feito pelo `externalCustomerId` (esse sim confiável, vem em toda cobrança do Asaas) — a `Subscription` é salva como pendente (`externalSubId: null`) antes do redirecionamento, e o webhook completa o vínculo quando o pagamento é confirmado.
+- Novo campo `Subscription.externalPaymentMethod` (`"pix"` ou `"credit_card"`) pra saber como cada empresa paga.
+- Testado: `tests/integration/asaas-card-checkout.test.ts` (cria o registro pendente certo) e `asaas-webhook.test.ts` estendido (o vínculo por `externalCustomerId` funciona). Tudo passando, typecheck/lint limpos.
+- **Falta, antes de implantar**: rodar um checkout completo de verdade (idealmente em sandbox do Asaas — `ASAAS_ENV=sandbox`; hoje o projeto só tem chave de **produção** configurada, nunca usou sandbox) e confirmar que o webhook realmente libera a empresa. Testes automatizados mockam o Asaas — não substituem essa rodada real, porque é exatamente o tipo de integração que parece certa no código e falha silenciosamente na prática. Combinado não implantar sem isso.
+- Alguns detalhes da API do Asaas Checkout (nome exato de campos no corpo da requisição, se aceita `customer` por id ou exige dados inline) foram confirmados pela documentação oficial mas não testados contra a API de verdade ainda — primeira tentativa real pode exigir ajuste fino.
 
 ## Fila de ideias discutidas (não começadas)
 9. Stripe (preencher chaves reais) — deixado pro final de propósito. Único item técnico que sobrou da lista original.

@@ -39,18 +39,35 @@ export async function POST(req: Request) {
   const body = await req.json();
   const status = mapAsaasEvent(body?.event);
   const asaasSubscriptionId: string | undefined = body?.payment?.subscription;
+  const asaasCustomerId: string | undefined = body?.payment?.customer;
 
   if (status && asaasSubscriptionId) {
-    const subscription = await prisma.subscription.findFirst({
+    let subscription = await prisma.subscription.findFirst({
       where: { externalSubId: asaasSubscriptionId },
       select: { companyId: true },
     });
+
+    // Checkout de cartão: a assinatura no Asaas só nasce depois que o
+    // cliente termina o pagamento, então não tínhamos o externalSubId na
+    // hora de criar o registro local (ver createAsaasCardCheckoutAction).
+    // Primeira confirmação: acha pelo cliente Asaas (esse sim é confiável,
+    // vem em toda cobrança) e completa o vínculo. Só considera registros
+    // ainda pendentes (externalSubId null) pra não roubar o vínculo de uma
+    // assinatura que já está ligada a outro checkout.
+    if (!subscription && asaasCustomerId) {
+      subscription = await prisma.subscription.findFirst({
+        where: { externalCustomerId: asaasCustomerId, externalSubId: null },
+        orderBy: { createdAt: "desc" },
+        select: { companyId: true },
+      });
+    }
 
     if (subscription) {
       await prisma.subscription.update({
         where: { companyId: subscription.companyId },
         data: {
           status,
+          externalSubId: asaasSubscriptionId,
           canceledAt: status === "CANCELED" ? new Date() : null,
           renewalDate: body?.payment?.dueDate ? new Date(body.payment.dueDate) : undefined,
         },

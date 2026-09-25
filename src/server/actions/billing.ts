@@ -7,6 +7,7 @@ import {
   isAsaasConfigured,
   createAsaasCustomer,
   createAsaasSubscription,
+  createAsaasCheckoutSession,
   getFirstPaymentForSubscription,
   getPixQrCode,
 } from "@/lib/asaas";
@@ -176,6 +177,7 @@ export async function createAsaasSubscriptionAction(
         externalProvider: "asaas",
         externalCustomerId: customerId,
         externalSubId: asaasSubscription.id,
+        externalPaymentMethod: "pix",
         startDate: new Date(),
         canceledAt: null,
       },
@@ -186,6 +188,7 @@ export async function createAsaasSubscriptionAction(
         externalProvider: "asaas",
         externalCustomerId: customerId,
         externalSubId: asaasSubscription.id,
+        externalPaymentMethod: "pix",
       },
     });
 
@@ -200,6 +203,104 @@ export async function createAsaasSubscriptionAction(
   } catch (error) {
     return actionError(
       error instanceof Error ? error.message : "Não foi possível criar a assinatura via PIX.",
+    );
+  }
+}
+
+interface CardCheckoutResult {
+  url: string;
+}
+
+/**
+ * Cria (ou reaproveita) o cliente no Asaas e devolve a URL do Checkout
+ * hospedado pra pagamento por cartão — o número do cartão é digitado na
+ * página do próprio Asaas, nunca passa pelo nosso servidor. Diferente do
+ * PIX, a assinatura de verdade só existe no Asaas depois que o cliente
+ * termina o checkout, então salvamos aqui um registro PENDENTE (sem
+ * externalSubId ainda) pra o webhook conseguir achar a empresa certa pelo
+ * externalCustomerId quando o pagamento for confirmado (ver
+ * src/app/api/webhooks/asaas/route.ts — o campo externalReference do
+ * Checkout não é propagado de forma confiável pelo Asaas até a assinatura
+ * gerada, por isso não usamos ele pra esse vínculo).
+ */
+export async function createAsaasCardCheckoutAction(
+  planId: string,
+  cpfCnpj: string,
+): Promise<ActionResult<CardCheckoutResult>> {
+  const session = await requireCompanyAdmin();
+
+  if (!isAsaasConfigured()) {
+    return actionError("Pagamentos ainda não configurados nesta instalação (falta ASAAS_API_KEY).");
+  }
+
+  const normalizedDocument = normalizeCpfCnpj(cpfCnpj);
+  if (normalizedDocument.length !== 11 && normalizedDocument.length !== 14) {
+    return actionError("CPF ou CNPJ inválido.");
+  }
+
+  const plan = await prisma.plan.findUnique({ where: { id: planId } });
+  if (!plan || !plan.isActive) return actionError("Plano inválido.");
+
+  const company = await prisma.company.findUnique({
+    where: { id: session.user.companyId },
+    include: { subscription: true },
+  });
+  if (!company) return actionError("Empresa não encontrada.");
+
+  try {
+    if (company.cnpj !== normalizedDocument) {
+      await prisma.company.update({
+        where: { id: company.id },
+        data: { cnpj: normalizedDocument },
+      });
+    }
+
+    let customerId = company.subscription?.externalProvider === "asaas"
+      ? company.subscription.externalCustomerId ?? undefined
+      : undefined;
+    if (!customerId) {
+      const customer = await createAsaasCustomer({
+        name: company.name,
+        email: company.email,
+        cpfCnpj: normalizedDocument,
+      });
+      customerId = customer.id;
+    }
+
+    const checkout = await createAsaasCheckoutSession({
+      customer: customerId,
+      value: plan.priceCents / 100,
+      successUrl: `${appUrl()}/painel/assinatura?status=sucesso`,
+      cancelUrl: `${appUrl()}/painel/assinatura?status=cancelado`,
+      expiredUrl: `${appUrl()}/painel/assinatura?status=expirado`,
+    });
+
+    await prisma.subscription.upsert({
+      where: { companyId: company.id },
+      update: {
+        planId: plan.id,
+        status: "PAST_DUE",
+        externalProvider: "asaas",
+        externalCustomerId: customerId,
+        externalSubId: null, // só o webhook preenche, quando o checkout for concluído
+        externalPaymentMethod: "credit_card",
+        startDate: new Date(),
+        canceledAt: null,
+      },
+      create: {
+        companyId: company.id,
+        planId: plan.id,
+        status: "PAST_DUE",
+        externalProvider: "asaas",
+        externalCustomerId: customerId,
+        externalPaymentMethod: "credit_card",
+      },
+    });
+
+    return actionSuccess({ url: checkout.link });
+  } catch (error) {
+    return actionError(
+      error instanceof Error ? error.message : "Não foi possível iniciar o checkout com cartão.",
     );
   }
 }

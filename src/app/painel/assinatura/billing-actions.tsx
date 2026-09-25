@@ -17,6 +17,7 @@ import {
   createCheckoutSessionAction,
   createBillingPortalSessionAction,
   createAsaasSubscriptionAction,
+  createAsaasCardCheckoutAction,
   getSubscriptionStatusAction,
 } from "@/server/actions/billing";
 
@@ -178,6 +179,89 @@ export function AsaasPixButton({
                 <DialogTitle>Pagamento confirmado! ✅</DialogTitle>
                 <DialogDescription>Sua assinatura já está ativa.</DialogDescription>
               </DialogHeader>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+type CardCheckoutStep = "closed" | "document" | "loading";
+
+/**
+ * Checkout de cartão via Asaas — ao contrário do PIX, não fica na tela: o
+ * cliente é redirecionado pra página hospedada do próprio Asaas (número do
+ * cartão nunca passa pelo nosso servidor), e volta pra cá depois de pagar.
+ * A confirmação chega depois, pelo webhook, de forma assíncrona.
+ */
+export function AsaasCardButton({
+  planId,
+  label,
+  hasDocument,
+}: {
+  planId: string;
+  label: string;
+  hasDocument: boolean;
+}) {
+  const [step, setStep] = useState<CardCheckoutStep>("closed");
+  const [document, setDocument] = useState("");
+
+  async function startCheckout(cpfCnpj: string) {
+    setStep("loading");
+    const result = await createAsaasCardCheckoutAction(planId, cpfCnpj);
+    if (!result.success || !result.data) {
+      toast.error(result.message ?? "Não foi possível iniciar o checkout com cartão.");
+      setStep("closed");
+      return;
+    }
+    window.location.href = result.data.url;
+  }
+
+  function openFlow() {
+    setStep(hasDocument ? "loading" : "document");
+    if (hasDocument) void startCheckout("");
+  }
+
+  return (
+    <>
+      <Button variant="outline" className="w-full" onClick={openFlow}>
+        {label}
+      </Button>
+
+      <Dialog open={step !== "closed"} onOpenChange={(open) => !open && setStep("closed")}>
+        <DialogContent>
+          {step === "document" && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Confirme o CPF ou CNPJ</DialogTitle>
+                <DialogDescription>Necessário para gerar a cobrança pelo Asaas.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-2">
+                <Label htmlFor="cardCpfCnpj">CPF ou CNPJ</Label>
+                <Input
+                  id="cardCpfCnpj"
+                  value={document}
+                  onChange={(e) => setDocument(e.target.value)}
+                  placeholder="Somente números"
+                />
+              </div>
+              <Button
+                className="w-full"
+                disabled={document.replace(/\D/g, "").length < 11}
+                onClick={() => void startCheckout(document)}
+              >
+                Continuar
+              </Button>
+            </>
+          )}
+
+          {step === "loading" && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Abrindo checkout...</DialogTitle>
+              </DialogHeader>
+              <p className="text-sm text-muted-foreground">Só um instante.</p>
             </>
           )}
         </DialogContent>
