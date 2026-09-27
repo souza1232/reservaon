@@ -48,15 +48,37 @@ interface AsaasCustomer {
   id: string;
 }
 
-export async function createAsaasCustomer(params: {
+/** Endereço do cliente — o Asaas Checkout (cartão) recusa cliente sem ele. */
+export interface AsaasAddress {
+  postalCode: string;
+  address: string;
+  addressNumber: string;
+  province: string;
+}
+
+interface AsaasCustomerParams {
   name: string;
   email: string;
   cpfCnpj: string;
-}): Promise<AsaasCustomer> {
-  return asaasFetch<AsaasCustomer>("/customers", {
-    method: "POST",
-    body: JSON.stringify(params),
-  });
+  phone: string;
+  billingAddress?: AsaasAddress;
+}
+
+function customerBody(params: AsaasCustomerParams): string {
+  // O Asaas Checkout exige telefone no cliente. Formato nacional, sem o 55.
+  let phone = params.phone.replace(/\D/g, "");
+  if (phone.length > 11 && phone.startsWith("55")) phone = phone.slice(2);
+  const { billingAddress, ...rest } = params;
+  return JSON.stringify({ ...rest, ...billingAddress, phone, mobilePhone: phone });
+}
+
+export async function createAsaasCustomer(params: AsaasCustomerParams): Promise<AsaasCustomer> {
+  return asaasFetch<AsaasCustomer>("/customers", { method: "POST", body: customerBody(params) });
+}
+
+/** Atualiza um cliente já existente (ex.: criado pelo PIX, sem endereço). */
+export async function updateAsaasCustomer(id: string, params: AsaasCustomerParams): Promise<AsaasCustomer> {
+  return asaasFetch<AsaasCustomer>(`/customers/${id}`, { method: "POST", body: customerBody(params) });
 }
 
 interface AsaasSubscription {

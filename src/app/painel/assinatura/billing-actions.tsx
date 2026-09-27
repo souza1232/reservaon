@@ -187,13 +187,16 @@ export function AsaasPixButton({
   );
 }
 
-type CardCheckoutStep = "closed" | "document" | "loading";
+type CardCheckoutStep = "closed" | "form" | "loading";
+
+const EMPTY_ADDRESS = { postalCode: "", address: "", addressNumber: "", province: "" };
 
 /**
  * Checkout de cartão via Asaas — ao contrário do PIX, não fica na tela: o
  * cliente é redirecionado pra página hospedada do próprio Asaas (número do
  * cartão nunca passa pelo nosso servidor), e volta pra cá depois de pagar.
- * A confirmação chega depois, pelo webhook, de forma assíncrona.
+ * A confirmação chega depois, pelo webhook, de forma assíncrona. Sempre pede
+ * o endereço de cobrança antes: o Asaas Checkout recusa cliente sem ele.
  */
 export function AsaasCardButton({
   planId,
@@ -206,36 +209,56 @@ export function AsaasCardButton({
 }) {
   const [step, setStep] = useState<CardCheckoutStep>("closed");
   const [document, setDocument] = useState("");
+  const [address, setAddress] = useState(EMPTY_ADDRESS);
 
-  async function startCheckout(cpfCnpj: string) {
+  const documentOk = hasDocument || document.replace(/\D/g, "").length >= 11;
+  const addressOk =
+    address.postalCode.replace(/\D/g, "").length === 8 &&
+    address.address.trim() !== "" &&
+    address.addressNumber.trim() !== "" &&
+    address.province.trim() !== "";
+
+  async function startCheckout() {
     setStep("loading");
-    const result = await createAsaasCardCheckoutAction(planId, cpfCnpj);
+    const result = await createAsaasCardCheckoutAction(planId, document, address);
     if (!result.success || !result.data) {
       toast.error(result.message ?? "Não foi possível iniciar o checkout com cartão.");
-      setStep("closed");
+      setStep("form");
       return;
     }
     window.location.href = result.data.url;
   }
 
-  function openFlow() {
-    setStep(hasDocument ? "loading" : "document");
-    if (hasDocument) void startCheckout("");
+  function field(key: keyof typeof EMPTY_ADDRESS, id: string, text: string, placeholder?: string) {
+    return (
+      <div className="space-y-2">
+        <Label htmlFor={id}>{text}</Label>
+        <Input
+          id={id}
+          value={address[key]}
+          onChange={(e) => setAddress((prev) => ({ ...prev, [key]: e.target.value }))}
+          placeholder={placeholder}
+        />
+      </div>
+    );
   }
 
   return (
     <>
-      <Button variant="outline" className="w-full" onClick={openFlow}>
+      <Button variant="outline" className="w-full" onClick={() => setStep("form")}>
         {label}
       </Button>
 
       <Dialog open={step !== "closed"} onOpenChange={(open) => !open && setStep("closed")}>
         <DialogContent>
-          {step === "document" && (
+          {step === "form" && (
             <>
               <DialogHeader>
-                <DialogTitle>Confirme o CPF ou CNPJ</DialogTitle>
-                <DialogDescription>Necessário para gerar a cobrança pelo Asaas.</DialogDescription>
+                <DialogTitle>Dados de cobrança</DialogTitle>
+                <DialogDescription>
+                  Exigidos pelo Asaas pra cobrança no cartão. Depois você vai pra página de
+                  pagamento segura do Asaas.
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-2">
                 <Label htmlFor="cardCpfCnpj">CPF ou CNPJ</Label>
@@ -243,15 +266,21 @@ export function AsaasCardButton({
                   id="cardCpfCnpj"
                   value={document}
                   onChange={(e) => setDocument(e.target.value)}
-                  placeholder="Somente números"
+                  placeholder={hasDocument ? "Já cadastrado — preencha só se quiser trocar" : "Somente números"}
                 />
+              </div>
+              {field("postalCode", "cardCep", "CEP", "Somente números")}
+              {field("address", "cardAddress", "Rua")}
+              <div className="grid grid-cols-2 gap-3">
+                {field("addressNumber", "cardNumber", "Número")}
+                {field("province", "cardProvince", "Bairro")}
               </div>
               <Button
                 className="w-full"
-                disabled={document.replace(/\D/g, "").length < 11}
-                onClick={() => void startCheckout(document)}
+                disabled={!documentOk || !addressOk}
+                onClick={() => void startCheckout()}
               >
-                Continuar
+                Continuar para o pagamento
               </Button>
             </>
           )}

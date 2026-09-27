@@ -36,6 +36,7 @@ vi.mock("@/auth", () => ({
 vi.mock("@/lib/asaas", () => ({
   isAsaasConfigured: () => true,
   createAsaasCustomer: vi.fn(async () => ({ id: "cus_checkout_mock" })),
+  updateAsaasCustomer: vi.fn(async () => ({ id: "cus_checkout_mock" })),
   createAsaasCheckoutSession: vi.fn(async () => ({
     id: "checkout_mock",
     link: "https://sandbox.asaas.com/checkoutSession/show/checkout_mock",
@@ -80,7 +81,7 @@ describe.skipIf(!RUN)("Checkout de cartão via Asaas (integração com banco rea
   it("cria checkout, devolve a URL e salva registro pendente (sem externalSubId ainda)", async () => {
     const { createAsaasCardCheckoutAction } = await import("@/server/actions/billing");
 
-    const result = await createAsaasCardCheckoutAction(planId, "12345678900");
+    const result = await createAsaasCardCheckoutAction(planId, "12345678900", { postalCode: "01310-100", address: "Avenida Paulista", addressNumber: "100", province: "Bela Vista" });
     expect(result.success).toBe(true);
     expect(result.data?.url).toBe("https://sandbox.asaas.com/checkoutSession/show/checkout_mock");
 
@@ -90,5 +91,14 @@ describe.skipIf(!RUN)("Checkout de cartão via Asaas (integração com banco rea
     expect(subscription.externalCustomerId).toBe("cus_checkout_mock");
     expect(subscription.externalSubId).toBeNull();
     expect(subscription.status).toBe("PAST_DUE");
+  });
+
+  it("usa o CPF/CNPJ já salvo quando a tela não manda nenhum (empresa sem o diálogo)", async () => {
+    const { createAsaasCardCheckoutAction } = await import("@/server/actions/billing");
+
+    // O teste anterior já gravou o documento na empresa.
+    const result = await createAsaasCardCheckoutAction(planId, "", { postalCode: "01310-100", address: "Avenida Paulista", addressNumber: "100", province: "Bela Vista" });
+    expect(result.success).toBe(true);
+    expect(result.data?.url).toBe("https://sandbox.asaas.com/checkoutSession/show/checkout_mock");
   });
 });

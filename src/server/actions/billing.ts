@@ -6,10 +6,12 @@ import { getStripeClient, isStripeConfigured } from "@/lib/stripe";
 import {
   isAsaasConfigured,
   createAsaasCustomer,
+  updateAsaasCustomer,
   createAsaasSubscription,
   createAsaasCheckoutSession,
   getFirstPaymentForSubscription,
   getPixQrCode,
+  type AsaasAddress,
 } from "@/lib/asaas";
 import { actionError, actionSuccess, type ActionResult } from "./types";
 
@@ -128,11 +130,6 @@ export async function createAsaasSubscriptionAction(
     return actionError("Pagamentos ainda não configurados nesta instalação (falta ASAAS_API_KEY).");
   }
 
-  const normalizedDocument = normalizeCpfCnpj(cpfCnpj);
-  if (normalizedDocument.length !== 11 && normalizedDocument.length !== 14) {
-    return actionError("CPF ou CNPJ inválido.");
-  }
-
   const plan = await prisma.plan.findUnique({ where: { id: planId } });
   if (!plan || !plan.isActive) return actionError("Plano inválido.");
 
@@ -141,6 +138,13 @@ export async function createAsaasSubscriptionAction(
     include: { subscription: true },
   });
   if (!company) return actionError("Empresa não encontrada.");
+
+  // Empresa que já tem CPF/CNPJ salvo não vê o diálogo (a tela manda "") —
+  // nesse caso usa o documento já cadastrado.
+  const normalizedDocument = normalizeCpfCnpj(cpfCnpj) || normalizeCpfCnpj(company.cnpj ?? "");
+  if (normalizedDocument.length !== 11 && normalizedDocument.length !== 14) {
+    return actionError("CPF ou CNPJ inválido.");
+  }
 
   try {
     if (company.cnpj !== normalizedDocument) {
@@ -158,6 +162,7 @@ export async function createAsaasSubscriptionAction(
         name: company.name,
         email: company.email,
         cpfCnpj: normalizedDocument,
+        phone: company.phone ?? company.whatsapp,
       });
       customerId = customer.id;
     }
@@ -226,16 +231,12 @@ interface CardCheckoutResult {
 export async function createAsaasCardCheckoutAction(
   planId: string,
   cpfCnpj: string,
+  address: AsaasAddress,
 ): Promise<ActionResult<CardCheckoutResult>> {
   const session = await requireCompanyAdmin();
 
   if (!isAsaasConfigured()) {
     return actionError("Pagamentos ainda não configurados nesta instalação (falta ASAAS_API_KEY).");
-  }
-
-  const normalizedDocument = normalizeCpfCnpj(cpfCnpj);
-  if (normalizedDocument.length !== 11 && normalizedDocument.length !== 14) {
-    return actionError("CPF ou CNPJ inválido.");
   }
 
   const plan = await prisma.plan.findUnique({ where: { id: planId } });
@@ -247,6 +248,25 @@ export async function createAsaasCardCheckoutAction(
   });
   if (!company) return actionError("Empresa não encontrada.");
 
+  // Empresa que já tem CPF/CNPJ salvo não vê o diálogo (a tela manda "") —
+  // nesse caso usa o documento já cadastrado.
+  const normalizedDocument = normalizeCpfCnpj(cpfCnpj) || normalizeCpfCnpj(company.cnpj ?? "");
+  if (normalizedDocument.length !== 11 && normalizedDocument.length !== 14) {
+    return actionError("CPF ou CNPJ inválido.");
+  }
+
+  // O Asaas Checkout recusa cliente sem endereço completo.
+  const billingAddress: AsaasAddress = {
+    postalCode: address.postalCode.replace(/\D/g, ""),
+    address: address.address.trim(),
+    addressNumber: address.addressNumber.trim(),
+    province: address.province.trim(),
+  };
+  if (billingAddress.postalCode.length !== 8) return actionError("CEP inválido.");
+  if (!billingAddress.address || !billingAddress.addressNumber || !billingAddress.province) {
+    return actionError("Preencha rua, número e bairro.");
+  }
+
   try {
     if (company.cnpj !== normalizedDocument) {
       await prisma.company.update({
@@ -255,16 +275,21 @@ export async function createAsaasCardCheckoutAction(
       });
     }
 
+    const customerParams = {
+      name: company.name,
+      email: company.email,
+      cpfCnpj: normalizedDocument,
+      phone: company.phone ?? company.whatsapp,
+      billingAddress,
+    };
     let customerId = company.subscription?.externalProvider === "asaas"
       ? company.subscription.externalCustomerId ?? undefined
       : undefined;
-    if (!customerId) {
-      const customer = await createAsaasCustomer({
-        name: company.name,
-        email: company.email,
-        cpfCnpj: normalizedDocument,
-      });
-      customerId = customer.id;
+    if (customerId) {
+      // Cliente criado antes (ex.: pelo PIX) pode não ter endereço/telefone.
+      await updateAsaasCustomer(customerId, customerParams);
+    } else {
+      customerId = (await createAsaasCustomer(customerParams)).id;
     }
 
     const checkout = await createAsaasCheckoutSession({

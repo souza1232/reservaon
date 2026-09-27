@@ -5,10 +5,24 @@
 **Deploy:** `vercel deploy --prod --yes` direto pela CLI.
 **Git:** repositório em https://github.com/souza1232/reservaon (branch `main`), commitado e sincronizado.
 
-## Status geral
-Tudo abaixo está **implementado, testado e publicado em produção**, exceto onde marcado "⏳ pendente". Cada funcionalidade grande foi feita com um plano técnico aprovado antes de codar — os planos ficam em `C:\Users\Desktop\.claude\plans\` (`jiggly-toasting-swing.md` = Pacote de sessões; `fancy-swimming-waffle.md` = Pedido de avaliação no Google + Sincronização com Google Agenda, nessa ordem — o mesmo arquivo foi reaproveitado pras duas por serem consecutivas na mesma sessão; `refactored-brewing-moonbeam.md` = Prontuário/histórico clínico, depois Papel de recepcionista, depois Checkout de cartão via Asaas — reaproveitado 3x por serem consecutivos na mesma sessão).
+## 🚨 Pendência: limpeza do teste de cartão (27/09/2026)
 
-⚠️ **Item 12 (Checkout de cartão via Asaas) está codado, testado (automatizado) e commitado, mas NÃO implantado em produção ainda** — falta o teste manual de ponta a ponta contra o Asaas (sandbox ou produção com cuidado) antes do deploy. Ver detalhes no item.
+✅ **Pagamento com cartão (e PIX) funcionando de ponta a ponta em produção** — confirmado com pagamento real de R$5: checkout do Asaas → webhook → assinatura `ACTIVE` sozinha. Causas que impediam (todas corrigidas):
+1. `vercel deploy` pela CLI enviava o `.env` local junto; com `.env` presente o Next.js expande `$...` **até nos valores vindos da Vercel**, e a chave do Asaas (`$aact_...`) virava `""`. Corrigido com `.vercelignore` (`.env*`). Nunca remover esse arquivo. (Localmente a chave também vira vazia no `npm run dev` — escapar como `\$aact_...` no `.env` se precisar testar Asaas local.)
+2. Empresa com CPF/CNPJ já salvo recebia "CPF inválido" (a tela manda `""`) — agora usa o documento salvo.
+3. Asaas Checkout exige telefone + endereço completo do cliente — cliente agora é criado/atualizado com telefone (da empresa) e endereço (diálogo de cartão pede CEP, rua, número, bairro). Mínimo do Asaas por cobrança: R$5.
+
+⏳ **Falta (bloqueado pela trava de segurança, precisa rodar manualmente ou aprovar):**
+- O teste acabou sendo pago na empresa `clinicasdospes` (`cmu3e6kko0001kz04ob0pyfvm`), não na de teste: devolver a assinatura dela pra `TRIAL` no plano Gratuito (`cmu32s2ae0000v4m4jt3jhfk6`), `renewalDate` 2026-09-30T00:58:20Z, campos `external*` nulos — **antes** de cancelar no Asaas (senão o webhook de cancelamento bloqueia a empresa).
+- Depois, cancelar a assinatura `sub_zljdij404kj1ftr2` no Asaas (R$5/mês) e, se quiser, estornar os R$5.
+- Apagar: empresa `QA Cartao Temp` (`cmuj24jz20002v4b0nqvoxoqm`) + login `qa-admin-cartao-1790467507159@example.com`, e plano `Teste Cartao R$5` (`cmuj24ja30000v4b0uh8olrvv`) — este aparece pra todas as empresas em `/painel/assinatura`.
+- E-mail nunca foi configurado (`EMAIL_SERVER_HOST/USER/PASSWORD` vazios até no `.env`) — por isso a verificação de e-mail no cadastro está sendo pulada em produção.
+- Ajuste pequeno pendente: a faixa vermelha "Stripe não configurado" em `/painel/assinatura` aparece mesmo com Asaas funcionando — mostrar só se nenhum meio de pagamento estiver configurado.
+
+## Status geral
+Tudo abaixo está **implementado e testado**, exceto onde marcado "⏳ pendente" ou "⚠️". Cada funcionalidade grande foi feita com um plano técnico aprovado antes de codar — os planos ficam em `C:\Users\Desktop\.claude\plans\` (`jiggly-toasting-swing.md` = Pacote de sessões; `fancy-swimming-waffle.md` = Pedido de avaliação no Google + Sincronização com Google Agenda, nessa ordem — o mesmo arquivo foi reaproveitado pras duas por serem consecutivas na mesma sessão; `refactored-brewing-moonbeam.md` = Prontuário/histórico clínico, depois Papel de recepcionista, depois Checkout de cartão via Asaas — reaproveitado 3x por serem consecutivos na mesma sessão).
+
+✅ **Item 12 (Checkout de cartão via Asaas)** confirmado de ponta a ponta com pagamento real em 27/09/2026 (ver pendência de limpeza no topo).
 
 ## O que já está pronto e no ar
 
@@ -31,8 +45,8 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 - Hosts de imagem: **mantido como está** de propósito — restringir a uma lista fixa quebraria empresas colando o link do próprio logo de qualquer lugar (não há vulnerabilidade real aqui, o Next.js já faz proxy seguro de qualquer imagem https).
 
 ### 3. Cobrança da assinatura da plataforma (empresa paga a gente)
-- **Stripe**: código pronto, mas **as chaves nunca foram preenchidas** (`STRIPE_SECRET_KEY` etc vazias) — decisão consciente de deixar "pro final".
-- **Asaas (PIX)**: **funcionando de verdade em produção**, com credenciais reais (não sandbox) — botão "Assinar com PIX" em `/painel/assinatura` gera QR Code na hora, webhook confirma pagamento e ativa a assinatura sozinho.
+- **Stripe**: código pronto (inclusive botão de cartão já funcional na UI), mas **as chaves nunca foram preenchidas** e o produto/preço do plano está em **modo teste** do Stripe — decisão consciente de não mexer, consolidar tudo em Asaas em vez disso (ver item 12).
+- **Asaas (PIX)**: código pronto e testado, credenciais reais existem no `.env` local — mas ⚠️ **confirmado nesta sessão que as env vars estão vazias na Vercel produção**, então na prática ninguém conseguiu assinar de verdade até isso ser corrigido (ver pendência urgente no topo deste arquivo). Botão "Assinar com PIX" em `/painel/assinatura` gera QR Code na hora, webhook confirma pagamento e ativa a assinatura sozinho — assim que as credenciais forem corrigidas na Vercel.
 - Plano Gratuito: 10 agendamentos/mês (era 30, reduzido de propósito pra empurrar conversão pro pago). Plano Profissional: R$49,90/mês.
 
 ### 4. Lista de espera automática
@@ -89,14 +103,19 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 - Ajustes menores de guard pra recepcionista conseguir trabalhar de verdade: `updateCustomerNotesAction` (observação do cliente) e `sellPackageToCustomerAction` (vender pacote já cadastrado) passaram de admin-only pra admin+recepcionista — criar/editar/apagar pacote (preço/catálogo) continua admin-only.
 - Testado em `tests/integration/receptionist.test.ts` (agendamento cross-profissional, observação/venda de pacote funcionando, bloqueio de prontuário/faturamento/configurações/gestão de profissionais, e que só admin cria/apaga recepcionista).
 
-### 12. Checkout de cartão via Asaas (⚠️ codado e testado, NÃO implantado ainda)
+### 12. Checkout de cartão via Asaas (✅ confirmado com pagamento real em 27/09/2026)
 - Motivação: até agora só dava pra pagar a assinatura via PIX. Cogitamos ativar o Stripe (já tem código pronto, botão inativo), mas descobrimos que o produto/preço cadastrado no plano está em **modo teste** do Stripe — reativar exigiria conta/chaves live do zero. Decisão: consolidar tudo no Asaas (já ativo), que suporta cartão recorrente nativamente, em vez de mexer no Stripe.
 - Usa o **Asaas Checkout** (página hospedada do próprio Asaas) e não a API de tokenização direta — o número do cartão nunca passa pelo nosso servidor, evitando ampliar o escopo de conformidade PCI-DSS do projeto.
 - **Achado técnico que moldou o design**: o campo `externalReference` do Asaas Checkout não é propagado de forma confiável até a assinatura gerada (bug documentado, relatado por outros devs). Por isso o vínculo entre o pagamento e a empresa certa é feito pelo `externalCustomerId` (esse sim confiável, vem em toda cobrança do Asaas) — a `Subscription` é salva como pendente (`externalSubId: null`) antes do redirecionamento, e o webhook completa o vínculo quando o pagamento é confirmado.
 - Novo campo `Subscription.externalPaymentMethod` (`"pix"` ou `"credit_card"`) pra saber como cada empresa paga.
-- Testado: `tests/integration/asaas-card-checkout.test.ts` (cria o registro pendente certo) e `asaas-webhook.test.ts` estendido (o vínculo por `externalCustomerId` funciona). Tudo passando, typecheck/lint limpos.
-- **Falta, antes de implantar**: rodar um checkout completo de verdade (idealmente em sandbox do Asaas — `ASAAS_ENV=sandbox`; hoje o projeto só tem chave de **produção** configurada, nunca usou sandbox) e confirmar que o webhook realmente libera a empresa. Testes automatizados mockam o Asaas — não substituem essa rodada real, porque é exatamente o tipo de integração que parece certa no código e falha silenciosamente na prática. Combinado não implantar sem isso.
+- Testado (automatizado): `tests/integration/asaas-card-checkout.test.ts` (cria o registro pendente certo) e `asaas-webhook.test.ts` estendido (o vínculo por `externalCustomerId` funciona). Tudo passando, typecheck/lint limpos. Migração aplicada em produção.
+- **Implantado em produção**, mas ao tentar o teste real de ponta a ponta descobrimos o problema das credenciais vazias na Vercel (ver pendência urgente no topo) — o teste com dinheiro real (plano "Teste Cartao R$1", empresa "QA Cartao Temp") ficou pausado até isso ser corrigido. Retomar dali: corrigir as credenciais → tentar de novo o checkout de cartão → conferir se o webhook libera a empresa → limpar os dados de teste.
 - Alguns detalhes da API do Asaas Checkout (nome exato de campos no corpo da requisição, se aceita `customer` por id ou exige dados inline) foram confirmados pela documentação oficial mas não testados contra a API de verdade ainda — primeira tentativa real pode exigir ajuste fino.
+
+### 13. Melhorias no site institucional e em Configurações
+- **Home reescrita** (`messages/pt.json` + `src/app/[locale]/page.tsx`): título e "Benefícios" trocados de linguagem de feature pra linguagem de resultado/dinheiro; nova seção própria em destaque só pro WhatsApp (ciclo completo: confirma → lembra com botão → preenche vaga cancelada → pede avaliação — antes era só um item perdido numa lista de 10); seção de demonstração agora deixa claro que mostra a tela do *cliente*, não o painel do dono; FAQ sobre WhatsApp corrigido (dizia "roadmap" pra API oficial, que já estava ativa há dias); CTA de suporte via WhatsApp (que só existia no rodapé) virou botão de verdade em mais dois lugares (perto de Planos e no CTA final).
+- **`/painel/configuracoes`**: "Página pública: /empresa/slug" virou link clicável (antes era só texto); card "Avaliação no Google" subiu pra logo depois de "Dados da empresa" (era depois de SEO); "SEO" e "Meta Pixel" agrupados sob um rótulo "Avançado / Marketing (opcional)".
+- Confirmado por leitura de código que o Meta Pixel já funciona de ponta a ponta (carrega na página pública, dispara evento "Schedule" na confirmação) — não precisou de mudança, só validação.
 
 ## Fila de ideias discutidas (não começadas)
 9. Stripe (preencher chaves reais) — deixado pro final de propósito. Único item técnico que sobrou da lista original.

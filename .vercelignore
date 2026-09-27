@@ -1,0 +1,4 @@
+# Nunca enviar arquivos .env no deploy via CLI: a Vercel injeta as variáveis
+# de ambiente pelo painel. Se o .env for junto, o Next.js expande "$..." até
+# nos valores vindos da Vercel — e a chave do Asaas ($aact_...) vira vazia.
+.env*
