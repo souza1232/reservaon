@@ -30,6 +30,12 @@ function stripLocalePrefix(pathname: string): string {
   return match ? match[2] || "/" : pathname;
 }
 
+const NON_LOCALIZED_PAGES = [
+  "/esqueci-senha",
+  "/redefinir-senha",
+  "/verificar-email",
+];
+
 export default auth((req) => {
   const { nextUrl } = req;
   const path = stripLocalePrefix(nextUrl.pathname);
@@ -62,6 +68,14 @@ export default auth((req) => {
 
   if (isAuthPage && isLoggedIn) {
     return NextResponse.redirect(new URL(areaForRole(role), nextUrl));
+  }
+
+  // Páginas públicas que não ficam sob [locale] — se passarem pelo next-intl
+  // ele reescreve pra /pt/<página>, que não existe, e dá 404. (Páginas que
+  // usam SiteHeader/SiteFooter precisam ficar sob [locale], por causa do
+  // contexto de tradução — ex.: /sobre, /termos, /privacidade.)
+  if (NON_LOCALIZED_PAGES.some((page) => path === page || path.startsWith(`${page}/`))) {
+    return NextResponse.next();
   }
 
   // Todo o restante (home, /empresa/*, /entrar, /cadastro) passa pelo
