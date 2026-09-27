@@ -52,3 +52,4 @@ export const DEFAULT_COMPANY_SETTINGS = {
  */
 export const RESERVAON_SUPPORT_WHATSAPP = "73999032652";
 export const RESERVAON_CNPJ = "66.173.608/0001-26";
+export const RESERVAON_SUPPORT_EMAIL = "reservaoncontato@gmail.com";

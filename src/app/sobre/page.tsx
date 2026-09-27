@@ -3,7 +3,7 @@ import { MessageCircle } from "lucide-react";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
 import { normalizeWhatsappNumber } from "@/lib/format";
-import { RESERVAON_SUPPORT_WHATSAPP, RESERVAON_CNPJ } from "@/lib/constants";
+import { RESERVAON_SUPPORT_WHATSAPP, RESERVAON_SUPPORT_EMAIL, RESERVAON_CNPJ } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Sobre o ReservaOn" };
 
@@ -110,6 +110,12 @@ export default function AboutPage() {
               <MessageCircle className="h-4 w-4" />
               Falar com o suporte
             </a>
+            <p className="mt-2">
+              Ou por e-mail:{" "}
+              <a href={`mailto:${RESERVAON_SUPPORT_EMAIL}`} className="font-medium text-primary underline">
+                {RESERVAON_SUPPORT_EMAIL}
+              </a>
+            </p>
             <p className="mt-4 text-xs text-muted-foreground">CNPJ {RESERVAON_CNPJ}</p>
           </section>
         </div>

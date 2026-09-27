@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site/site-header";
 import { SiteFooter } from "@/components/site/site-footer";
+import { RESERVAON_SUPPORT_EMAIL } from "@/lib/constants";
 
 export const metadata: Metadata = { title: "Política de Privacidade" };
 
@@ -56,6 +57,13 @@ export default function PrivacyPage() {
               Em caso de dúvidas sobre esta política, entre em contato diretamente com a empresa
               onde você realizou o agendamento, responsável pelo tratamento dos seus dados como
               controladora.
+            </p>
+            <p>
+              Para assuntos sobre a própria plataforma ReservaOn, escreva para{" "}
+              <a href={`mailto:${RESERVAON_SUPPORT_EMAIL}`} className="underline">
+                {RESERVAON_SUPPORT_EMAIL}
+              </a>
+              .
             </p>
           </section>
         </div>

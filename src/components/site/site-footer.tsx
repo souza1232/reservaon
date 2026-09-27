@@ -1,9 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import PlainLink from "next/link";
-import { MessageCircle } from "lucide-react";
+import { Mail, MessageCircle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { normalizeWhatsappNumber } from "@/lib/format";
-import { RESERVAON_SUPPORT_WHATSAPP, RESERVAON_CNPJ } from "@/lib/constants";
+import { RESERVAON_SUPPORT_WHATSAPP, RESERVAON_SUPPORT_EMAIL, RESERVAON_CNPJ } from "@/lib/constants";
 import { Logo } from "./logo";
 
 const supportWhatsappLink = `https://wa.me/${normalizeWhatsappNumber(RESERVAON_SUPPORT_WHATSAPP)}?text=${encodeURIComponent("Olá! Preciso de ajuda com o ReservaOn.")}`;
@@ -26,6 +26,13 @@ export async function SiteFooter() {
             >
               <MessageCircle className="h-4 w-4" />
               {t("support")}
+            </a>
+            <a
+              href={`mailto:${RESERVAON_SUPPORT_EMAIL}`}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <Mail className="h-4 w-4" />
+              {RESERVAON_SUPPORT_EMAIL}
             </a>
           </div>
           <div className="grid grid-cols-2 gap-8 text-sm sm:grid-cols-3">
