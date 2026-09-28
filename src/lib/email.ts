@@ -50,6 +50,8 @@ export async function sendEmail({
     await transport.sendMail({ from: process.env.EMAIL_FROM, to, subject, html });
     return { sent: true };
   } catch (error) {
+    // Sem isso, falha de SMTP (senha errada, porta etc.) some sem rastro nos logs da Vercel.
+    console.error("[email] falha ao enviar:", error instanceof Error ? error.message : error);
     return {
       sent: false,
       error: error instanceof Error ? error.message : "Erro desconhecido ao enviar e-mail.",
