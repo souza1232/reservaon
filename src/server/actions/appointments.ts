@@ -9,6 +9,7 @@ import { notifyAppointmentByWhatsapp } from "@/lib/appointment-notifications";
 import { cancelAppointmentCore, offerNextWaitlistEntry } from "@/lib/appointment-mutations";
 import { tryConsumePackageSession } from "@/lib/package-consumption";
 import { syncAppointmentToGoogleCalendar } from "@/lib/appointment-google-sync";
+import { expireOverdueDeposits } from "@/lib/deposit-expiry";
 import {
   manualAppointmentSchema,
   appointmentStatusSchema,
@@ -31,6 +32,8 @@ export async function getInternalAvailableSlotsAction(
   if (session.user.role === "PROFESSIONAL" && professionalId !== session.user.professionalId) {
     return actionError("Você só pode consultar sua própria agenda.");
   }
+
+  await expireOverdueDeposits(session.user.companyId);
 
   try {
     const slots = await getAvailableSlots({
@@ -72,6 +75,8 @@ export async function createManualAppointmentAction(
 
   const company = await prisma.company.findUnique({ where: { id: companyId } });
   if (!company) return actionError("Empresa não encontrada.");
+
+  await expireOverdueDeposits(companyId);
 
   const service = await prisma.service.findFirst({
     where: { id: data.serviceId, companyId },
@@ -176,6 +181,42 @@ export async function updateAppointmentStatusAction(input: unknown): Promise<Act
   await prisma.appointment.update({ where: { id: appointmentId }, data: { status } });
   revalidatePath("/painel/agenda");
   revalidatePath("/profissional");
+  return actionSuccess();
+}
+
+/**
+ * "Sinal recebido": a empresa conferiu no banco que o PIX do sinal caiu. O
+ * sistema não tem como saber sozinho (o PIX vai direto pra chave da
+ * empresa, sem gateway) — ver src/lib/deposit.ts. Confirma o agendamento
+ * junto, se ainda estiver pendente.
+ */
+export async function confirmDepositAction(appointmentId: string): Promise<ActionResult> {
+  const session = await requireCompanySession();
+  const appointment = await prisma.appointment.findUnique({ where: { id: appointmentId } });
+  if (!appointment) return actionError("Agendamento não encontrado.");
+  if (appointment.companyId !== session.user.companyId) {
+    return actionError("Recurso não pertence à sua empresa.");
+  }
+  if (
+    session.user.role === "PROFESSIONAL" &&
+    appointment.professionalId !== session.user.professionalId
+  ) {
+    return actionError("Você só pode alterar agendamentos da sua própria agenda.");
+  }
+  if (appointment.depositStatus !== "PENDING") {
+    return actionError("Este agendamento não tem sinal pendente.");
+  }
+
+  await prisma.appointment.update({
+    where: { id: appointmentId },
+    data: {
+      depositStatus: "PAID",
+      ...(appointment.status === "PENDING" && { status: "CONFIRMED" }),
+    },
+  });
+  revalidatePath("/painel/agenda");
+  revalidatePath("/profissional");
+  revalidatePath("/recepcao");
   return actionSuccess();
 }
 

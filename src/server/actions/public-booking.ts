@@ -8,6 +8,8 @@ import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { notifyAppointmentByWhatsapp } from "@/lib/appointment-notifications";
 import { tryConsumePackageSession } from "@/lib/package-consumption";
 import { syncAppointmentToGoogleCalendar } from "@/lib/appointment-google-sync";
+import { requiredDepositCents, depositDueAt } from "@/lib/deposit";
+import { expireOverdueDeposits } from "@/lib/deposit-expiry";
 import { actionError, actionSuccess, type ActionResult } from "./types";
 
 interface GetSlotsInput {
@@ -37,6 +39,9 @@ export async function getPublicAvailableSlotsAction(
   if (!company || company.status !== "ACTIVE") {
     return actionError("Empresa não encontrada ou indisponível.");
   }
+
+  // Sinal vencido libera o horário antes de calcular o que está livre.
+  await expireOverdueDeposits(company.id);
 
   try {
     const slots = await getAvailableSlots({
@@ -84,10 +89,15 @@ export async function createPublicAppointmentAction(
   if (!parsed.success) return { success: false, fieldErrors: parsed.error.flatten().fieldErrors };
   const data = parsed.data;
 
-  const company = await prisma.company.findUnique({ where: { slug } });
+  const company = await prisma.company.findUnique({
+    where: { slug },
+    include: { settings: true, plan: { select: { priceCents: true } } },
+  });
   if (!company || company.status !== "ACTIVE") {
     return actionError("Empresa não encontrada ou indisponível.");
   }
+
+  await expireOverdueDeposits(company.id);
 
   const service = await prisma.service.findFirst({
     where: { id: data.serviceId, companyId: company.id, isActive: true },
@@ -132,6 +142,14 @@ export async function createPublicAppointmentAction(
           serviceId: data.serviceId,
         });
 
+        const priceCents = packageUsed ? 0 : service.priceCents;
+        const depositCents = requiredDepositCents({
+          isPaidPlan: (company.plan?.priceCents ?? 0) > 0,
+          settings: company.settings,
+          serviceRequiresDeposit: service.requiresDeposit,
+          priceCents,
+        });
+
         return tx.appointment.create({
           data: {
             companyId: company.id,
@@ -142,8 +160,17 @@ export async function createPublicAppointmentAction(
             endAt,
             status: "PENDING",
             notes: data.notes || null,
-            priceCents: packageUsed ? 0 : service.priceCents,
+            priceCents,
             customerPackageId: packageUsed?.customerPackageId,
+            ...(depositCents > 0 && {
+              depositCents,
+              depositStatus: "PENDING",
+              depositDueAt: depositDueAt(
+                new Date(),
+                startAt,
+                company.settings?.depositDeadlineMinutes ?? 120,
+              ),
+            }),
           },
         });
       },

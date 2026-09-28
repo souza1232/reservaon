@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireCompanyAdmin } from "@/lib/guards";
 import { companyProfileSchema, companySettingsSchema } from "@/lib/validations/company";
 import { workingHourIntervalSchema } from "@/lib/validations/professional";
+import { normalizePixKey } from "@/lib/pix";
 import { z } from "zod";
 import { actionError, actionSuccess, type ActionResult } from "./types";
 
@@ -43,7 +44,23 @@ export async function updateCompanySettingsAction(input: unknown): Promise<Actio
   const session = await requireCompanyAdmin();
   const parsed = companySettingsSchema.safeParse(input);
   if (!parsed.success) return { success: false, fieldErrors: parsed.error.flatten().fieldErrors };
-  const data = parsed.data;
+
+  const depositPixKey = parsed.data.depositPixKey ? normalizePixKey(parsed.data.depositPixKey) : null;
+  if (parsed.data.depositPixKey && !depositPixKey) {
+    return {
+      success: false,
+      fieldErrors: { depositPixKey: ["Chave PIX inválida. Use CPF, CNPJ, celular, e-mail ou chave aleatória."] },
+    };
+  }
+  const data = {
+    ...parsed.data,
+    depositPixKey,
+    depositValue:
+      parsed.data.depositMode === "FIXED"
+        ? Math.round(parsed.data.depositValue * 100)
+        : parsed.data.depositValue,
+    depositPolicyText: parsed.data.depositPolicyText || null,
+  };
 
   await prisma.companySettings.upsert({
     where: { companyId: session.user.companyId },

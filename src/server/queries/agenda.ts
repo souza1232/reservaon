@@ -3,6 +3,7 @@ import { addDays, startOfWeek, startOfMonth, endOfMonth, eachDayOfInterval } fro
 import { fromZonedTime, formatInTimeZone } from "date-fns-tz";
 import { prisma } from "@/lib/prisma";
 import type { AppointmentStatus } from "@prisma/client";
+import { expireOverdueDeposits } from "@/lib/deposit-expiry";
 
 function dayRangeUtc(dateISO: string, timezone: string) {
   const start = fromZonedTime(`${dateISO}T00:00:00`, timezone);
@@ -17,6 +18,9 @@ interface AgendaScope {
 
 export async function getDayAgenda(dateISO: string, timezone: string, scope: AgendaScope) {
   const { start, end } = dayRangeUtc(dateISO, timezone);
+
+  // Sinal vencido aparece já cancelado (horário livre) ao abrir a agenda.
+  await expireOverdueDeposits(scope.companyId);
 
   const [appointments, blockedTimes] = await Promise.all([
     prisma.appointment.findMany({

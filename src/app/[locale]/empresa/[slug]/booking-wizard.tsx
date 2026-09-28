@@ -34,6 +34,7 @@ interface Service {
   priceCents: number;
   durationMinutes: number;
   imageUrl: string | null;
+  depositCents: number;
   professionals: Professional[];
 }
 
@@ -50,6 +51,7 @@ interface Company {
   instagram: string | null;
   timezone: string;
   waitlistEnabled: boolean;
+  depositPolicyText: string | null;
   services: Service[];
 }
 
@@ -412,6 +414,16 @@ export function BookingWizard({ company }: { company: Company }) {
               <Row label={t("confirm.time")} value={selectedSlot.label} />
               <Row label={t("confirm.price")} value={formatCentsToBRL(selectedService.priceCents)} />
             </Card>
+            {selectedService.depositCents > 0 && (
+              <div className="space-y-1 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                <p>{t("confirm.depositNotice", { amount: formatCentsToBRL(selectedService.depositCents) })}</p>
+                {company.depositPolicyText && (
+                  <p>
+                    <strong>{t("confirm.depositPolicy")}</strong> {company.depositPolicyText}
+                  </p>
+                )}
+              </div>
+            )}
             <Button className="w-full" size="lg" disabled={isPending} onClick={handleConfirm}>
               {isPending ? t("confirm.submitting") : t("confirm.submit")}
             </Button>

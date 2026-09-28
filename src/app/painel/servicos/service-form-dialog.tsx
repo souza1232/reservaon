@@ -38,6 +38,7 @@ interface ServiceFormDialogProps {
     durationMinutes: number;
     imageUrl: string | null;
     isActive: boolean;
+    requiresDeposit: boolean;
     professionalIds: string[];
   };
 }
@@ -62,6 +63,7 @@ export function ServiceFormDialog({ professionals, uploadEnabled, service }: Ser
       durationMinutes: service?.durationMinutes ?? 30,
       imageUrl: service?.imageUrl ?? "",
       isActive: service?.isActive ?? true,
+      requiresDeposit: service?.requiresDeposit ?? true,
       professionalIds: service?.professionalIds ?? [],
     },
   });
@@ -75,6 +77,7 @@ export function ServiceFormDialog({ professionals, uploadEnabled, service }: Ser
         durationMinutes: service?.durationMinutes ?? 30,
         imageUrl: service?.imageUrl ?? "",
         isActive: service?.isActive ?? true,
+        requiresDeposit: service?.requiresDeposit ?? true,
         professionalIds: service?.professionalIds ?? [],
       });
     }
@@ -197,6 +200,22 @@ export function ServiceFormDialog({ professionals, uploadEnabled, service }: Ser
               name="isActive"
               render={({ field }) => (
                 <Switch id="isActive" checked={field.value} onCheckedChange={field.onChange} />
+              )}
+            />
+          </div>
+
+          <div className="flex items-center justify-between rounded-md border p-3">
+            <div>
+              <Label htmlFor="requiresDeposit">Exigir sinal</Label>
+              <p className="text-xs text-muted-foreground">
+                Só vale se o sinal via PIX estiver ligado em Configurações → Agenda.
+              </p>
+            </div>
+            <Controller
+              control={control}
+              name="requiresDeposit"
+              render={({ field }) => (
+                <Switch id="requiresDeposit" checked={field.value} onCheckedChange={field.onChange} />
               )}
             />
           </div>

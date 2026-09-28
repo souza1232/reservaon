@@ -6,6 +6,7 @@ import {
   autoCompleteDueAppointments,
   syncGoogleCalendarBlocks,
 } from "@/lib/appointment-mutations";
+import { expireOverdueDeposits } from "@/lib/deposit-expiry";
 
 /**
  * Disparado 1x por dia pelo Vercel Cron (ver vercel.json — plano Hobby só
@@ -65,6 +66,7 @@ export async function GET(request: Request) {
     await offerNextWaitlistEntry(offer);
   }
 
+  const { expired: depositsExpired } = await expireOverdueDeposits();
   const { completed: autoCompleted } = await autoCompleteDueAppointments();
   const { synced: googleSynced } = await syncGoogleCalendarBlocks();
 
@@ -73,5 +75,6 @@ export async function GET(request: Request) {
     waitlistExpired: expiredOffers.length,
     autoCompleted,
     googleSynced,
+    depositsExpired,
   });
 }

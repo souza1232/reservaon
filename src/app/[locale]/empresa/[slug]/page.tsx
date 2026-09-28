@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { FacebookPixel } from "@/components/facebook-pixel";
 import { BookingWizard } from "./booking-wizard";
+import { requiredDepositCents } from "@/lib/deposit";
 
 interface PageProps {
   params: Promise<{ slug: string; locale: string }>;
@@ -28,7 +29,17 @@ async function getPublicCompany(slug: string) {
       seoTitle: true,
       seoDescription: true,
       facebookPixelId: true,
-      settings: { select: { waitlistEnabled: true } },
+      plan: { select: { priceCents: true } },
+      settings: {
+        select: {
+          waitlistEnabled: true,
+          depositEnabled: true,
+          depositPixKey: true,
+          depositMode: true,
+          depositValue: true,
+          depositPolicyText: true,
+        },
+      },
       services: {
         where: { isActive: true },
         orderBy: { name: "asc" },
@@ -39,6 +50,7 @@ async function getPublicCompany(slug: string) {
           priceCents: true,
           durationMinutes: true,
           imageUrl: true,
+          requiresDeposit: true,
           professionals: {
             where: { professional: { isActive: true } },
             select: {
@@ -54,12 +66,24 @@ async function getPublicCompany(slug: string) {
 
   if (!company || company.status !== "ACTIVE") return null;
 
+  const { plan, settings, ...rest } = company;
+  const isPaidPlan = (plan?.priceCents ?? 0) > 0;
+
   return {
-    ...company,
-    waitlistEnabled: company.settings?.waitlistEnabled ?? false,
+    ...rest,
+    waitlistEnabled: settings?.waitlistEnabled ?? false,
+    depositPolicyText: settings?.depositPolicyText ?? null,
     services: company.services
-      .map((s) => ({
+      .map(({ requiresDeposit, ...s }) => ({
         ...s,
+        // Só informativo no passo de confirmação — quem decide de verdade é
+        // createPublicAppointmentAction (ex.: sessão de pacote não paga sinal).
+        depositCents: requiredDepositCents({
+          isPaidPlan,
+          settings: settings ?? null,
+          serviceRequiresDeposit: requiresDeposit,
+          priceCents: s.priceCents,
+        }),
         professionals: s.professionals.map((sp) => sp.professional),
       }))
       .filter((s) => s.professionals.length > 0),

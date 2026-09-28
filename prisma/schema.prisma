@@ -153,6 +153,17 @@ model CompanySettings {
   waitlistEnabled          Boolean @default(false)
   waitlistOfferWindowHours Int     @default(6)
 
+  // Sinal via PIX (recurso do plano pago, desligado por padrão). O PIX cai
+  // direto na chave da própria empresa — o sistema só gera o QR Code
+  // (src/lib/pix.ts) e a empresa confirma manualmente que recebeu.
+  depositEnabled         Boolean @default(false)
+  depositPixKey          String?
+  depositMode            String  @default("PERCENT") // "PERCENT" ou "FIXED"
+  depositValue           Int     @default(30) // % (1-100) ou centavos, conforme depositMode
+  depositDeadlineMinutes Int     @default(120)
+  depositAutoCancel      Boolean @default(true)
+  depositPolicyText      String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -169,9 +180,9 @@ model Subscription {
   canceledAt  DateTime?
 
   // Prepared for future Stripe / Mercado Pago integration — do not fill without real credentials.
-  externalProvider   String?
-  externalCustomerId String?
-  externalSubId      String?
+  externalProvider      String?
+  externalCustomerId    String?
+  externalSubId         String?
   // "pix" ou "credit_card" — só preenchido quando externalProvider = "asaas",
   // que suporta os dois. Não infere do resto, é setado explícito nas actions.
   externalPaymentMethod String?
@@ -247,6 +258,8 @@ model Service {
   durationMinutes Int
   imageUrl        String?
   isActive        Boolean @default(true)
+  // Só vale quando a empresa liga o sinal via PIX em Configurações.
+  requiresDeposit Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -425,6 +438,13 @@ model Appointment {
   customerPackageId String?
   customerPackage   CustomerPackage? @relation(fields: [customerPackageId], references: [id])
 
+  // Sinal via PIX: preenchidos só quando o agendamento exigiu sinal.
+  // depositStatus: "PENDING" (aguardando), "PAID" (empresa confirmou) ou
+  // "EXPIRED" (prazo venceu e o horário foi liberado).
+  depositCents  Int?
+  depositStatus String?
+  depositDueAt  DateTime?
+
   // Id do evento espelhado no Google Agenda do profissional, se ele tiver
   // conectado a conta (ver GoogleCalendarConnection e src/lib/appointment-google-sync.ts).
   googleEventId String?
@@ -440,6 +460,7 @@ model Appointment {
   @@index([professionalId, startAt])
   @@index([customerId])
   @@index([customerPackageId])
+  @@index([depositStatus, depositDueAt])
 }
 
 /**

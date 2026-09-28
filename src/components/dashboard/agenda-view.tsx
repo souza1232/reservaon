@@ -165,11 +165,36 @@ async function DayAgenda({
                     {item.data.service.name} · {item.data.professional.name} ·{" "}
                     {formatCentsToBRL(item.data.priceCents)}
                   </p>
+                  {item.data.depositStatus && item.data.depositCents != null && (
+                    <p
+                      className={`text-xs font-medium ${
+                        item.data.depositStatus === "PAID"
+                          ? "text-emerald-600"
+                          : item.data.depositStatus === "PENDING"
+                            ? "text-amber-600"
+                            : "text-muted-foreground"
+                      }`}
+                    >
+                      {item.data.depositStatus === "PAID" &&
+                        `Sinal de ${formatCentsToBRL(item.data.depositCents)} recebido`}
+                      {item.data.depositStatus === "PENDING" &&
+                        `Aguardando sinal de ${formatCentsToBRL(item.data.depositCents)}${
+                          item.data.depositDueAt
+                            ? ` (prazo: ${formatTime(item.data.depositDueAt, timezone)})`
+                            : ""
+                        }`}
+                      {item.data.depositStatus === "EXPIRED" && "Sinal não pago no prazo — horário liberado"}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <AppointmentStatusBadge status={item.data.status} />
-                <AppointmentActionsMenu appointmentId={item.data.id} currentStatus={item.data.status} />
+                <AppointmentActionsMenu
+                  appointmentId={item.data.id}
+                  currentStatus={item.data.status}
+                  depositPending={item.data.depositStatus === "PENDING"}
+                />
               </div>
             </div>
           ) : (

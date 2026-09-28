@@ -205,7 +205,9 @@
       "time": "Time",
       "price": "Price",
       "submit": "Confirm booking",
-      "submitting": "Confirming..."
+      "submitting": "Confirming...",
+      "depositNotice": "This service requires a {amount} deposit via PIX, paid right after confirming. The deposit is deducted from the final price.",
+      "depositPolicy": "Business policy:"
     },
     "errors": {
       "loadSlots": "Couldn't load available times.",
@@ -230,7 +232,18 @@
     "address": "Address",
     "whatsappButton": "Send confirmation via WhatsApp",
     "calendarButton": "Add to calendar",
-    "newBooking": "Book again"
+    "newBooking": "Book again",
+    "titleAwaitingDeposit": "Just the deposit left!",
+    "awaitingDeposit": "Awaiting deposit",
+    "depositTitle": "Pay the {amount} deposit via PIX",
+    "depositInstructions": "Open your bank app, choose PIX and scan the QR Code or use the \"copy and paste\" code. The amount is pre-filled and goes straight to {company}.",
+    "depositDeadline": "Pay by {time} on {date}. After that the slot may be released to someone else.",
+    "depositAfter": "After you pay, the business checks the PIX and confirms your booking.",
+    "copyCode": "Copy PIX code",
+    "copied": "Code copied!",
+    "depositPaid": "{amount} deposit received",
+    "depositExpired": "The deposit deadline passed and the slot was released.",
+    "depositPolicy": "Business policy:"
   },
   "LanguageSwitcher": {
     "label": "Language"

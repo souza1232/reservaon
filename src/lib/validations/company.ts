@@ -38,6 +38,22 @@ export const companySettingsSchema = z.object({
   notifyOnReschedule: z.boolean().default(true),
   waitlistEnabled: z.boolean().default(false),
   waitlistOfferWindowHours: z.coerce.number().int().min(1).max(72),
+  depositEnabled: z.boolean().default(false),
+  depositPixKey: z.string().trim().max(120).optional().or(z.literal("")),
+  depositMode: z.enum(["PERCENT", "FIXED"]).default("PERCENT"),
+  // PERCENT: porcentagem (1-100). FIXED: valor em reais no formulário —
+  // convertido pra centavos em updateCompanySettingsAction.
+  depositValue: z.coerce.number().positive("Informe o valor do sinal."),
+  depositDeadlineMinutes: z.coerce.number().int().min(15).max(10080),
+  depositAutoCancel: z.boolean().default(true),
+  depositPolicyText: z.string().trim().max(500).optional().or(z.literal("")),
+}).superRefine((data, ctx) => {
+  if (data.depositMode === "PERCENT" && (data.depositValue > 100 || !Number.isInteger(data.depositValue))) {
+    ctx.addIssue({ code: "custom", path: ["depositValue"], message: "Use uma porcentagem inteira de 1 a 100." });
+  }
+  if (data.depositEnabled && !data.depositPixKey) {
+    ctx.addIssue({ code: "custom", path: ["depositPixKey"], message: "Informe a chave PIX pra receber o sinal." });
+  }
 });
 
 export type CompanySettingsInput = z.infer<typeof companySettingsSchema>;

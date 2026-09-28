@@ -14,7 +14,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { APPOINTMENT_STATUS_LABELS } from "@/lib/constants";
-import { updateAppointmentStatusAction, cancelAppointmentAction } from "@/server/actions/appointments";
+import {
+  updateAppointmentStatusAction,
+  cancelAppointmentAction,
+  confirmDepositAction,
+} from "@/server/actions/appointments";
 
 const STATUS_ORDER: AppointmentStatus[] = [
   "PENDING",
@@ -27,9 +31,11 @@ const STATUS_ORDER: AppointmentStatus[] = [
 export function AppointmentActionsMenu({
   appointmentId,
   currentStatus,
+  depositPending = false,
 }: {
   appointmentId: string;
   currentStatus: AppointmentStatus;
+  depositPending?: boolean;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -41,6 +47,17 @@ export function AppointmentActionsMenu({
     if (!result.success) toast.error(result.message ?? "Não foi possível atualizar.");
     else {
       toast.success("Status atualizado.");
+      router.refresh();
+    }
+  }
+
+  async function handleDepositReceived() {
+    setLoading(true);
+    const result = await confirmDepositAction(appointmentId);
+    setLoading(false);
+    if (!result.success) toast.error(result.message ?? "Não foi possível atualizar.");
+    else {
+      toast.success("Sinal registrado e agendamento confirmado.");
       router.refresh();
     }
   }
@@ -65,6 +82,14 @@ export function AppointmentActionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        {depositPending && (
+          <>
+            <DropdownMenuItem onClick={handleDepositReceived} className="font-medium text-emerald-700">
+              Sinal recebido
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
         {STATUS_ORDER.filter((s) => s !== currentStatus).map((status) => (
           <DropdownMenuItem key={status} onClick={() => setStatus(status)}>
             Marcar como {APPOINTMENT_STATUS_LABELS[status]}

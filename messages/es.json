@@ -205,7 +205,9 @@
       "time": "Horario",
       "price": "Precio",
       "submit": "Confirmar reserva",
-      "submitting": "Confirmando..."
+      "submitting": "Confirmando...",
+      "depositNotice": "Este servicio requiere una seña de {amount} por PIX, pagada justo después de confirmar. La seña se descuenta del valor final.",
+      "depositPolicy": "Regla del establecimiento:"
     },
     "errors": {
       "loadSlots": "No se pudieron cargar los horarios.",
@@ -230,7 +232,18 @@
     "address": "Dirección",
     "whatsappButton": "Enviar confirmación por WhatsApp",
     "calendarButton": "Añadir al calendario",
-    "newBooking": "Hacer otra reserva"
+    "newBooking": "Hacer otra reserva",
+    "titleAwaitingDeposit": "¡Solo falta la seña!",
+    "awaitingDeposit": "Esperando seña",
+    "depositTitle": "Paga la seña de {amount} por PIX",
+    "depositInstructions": "Abre la app de tu banco, elige PIX y escanea el código QR o usa el código \"copiar y pegar\". El valor ya viene cargado y va directo a {company}.",
+    "depositDeadline": "Paga antes de las {time} del {date}. Después el horario puede liberarse para otra persona.",
+    "depositAfter": "Después de pagar, el establecimiento verifica el PIX y confirma tu horario.",
+    "copyCode": "Copiar código PIX",
+    "copied": "¡Código copiado!",
+    "depositPaid": "Seña de {amount} recibida",
+    "depositExpired": "El plazo de la seña venció y el horario fue liberado.",
+    "depositPolicy": "Regla del establecimiento:"
   },
   "LanguageSwitcher": {
     "label": "Idioma"

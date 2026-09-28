@@ -216,7 +216,9 @@
       "time": "Horário",
       "price": "Valor",
       "submit": "Confirmar agendamento",
-      "submitting": "Confirmando..."
+      "submitting": "Confirmando...",
+      "depositNotice": "Este serviço exige um sinal de {amount} via PIX, pago logo após confirmar. O sinal é descontado do valor final.",
+      "depositPolicy": "Regra do estabelecimento:"
     },
     "errors": {
       "loadSlots": "Não foi possível carregar os horários.",
@@ -241,7 +243,18 @@
     "address": "Endereço",
     "whatsappButton": "Enviar confirmação pelo WhatsApp",
     "calendarButton": "Adicionar ao calendário",
-    "newBooking": "Fazer novo agendamento"
+    "newBooking": "Fazer novo agendamento",
+    "titleAwaitingDeposit": "Falta só o sinal!",
+    "awaitingDeposit": "Aguardando sinal",
+    "depositTitle": "Pague o sinal de {amount} por PIX",
+    "depositInstructions": "Abra o app do seu banco, escolha PIX e escaneie o QR Code ou use o código \"copia e cola\". O valor já vem preenchido e cai direto na conta de {company}.",
+    "depositDeadline": "Pague até {time} de {date}. Depois disso o horário pode ser liberado para outra pessoa.",
+    "depositAfter": "Depois de pagar, o estabelecimento confere o PIX e confirma seu horário.",
+    "copyCode": "Copiar código PIX",
+    "copied": "Código copiado!",
+    "depositPaid": "Sinal de {amount} recebido",
+    "depositExpired": "O prazo do sinal venceu e o horário foi liberado.",
+    "depositPolicy": "Regra do estabelecimento:"
   },
   "LanguageSwitcher": {
     "label": "Idioma"

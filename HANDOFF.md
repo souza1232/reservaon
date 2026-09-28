@@ -118,10 +118,18 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 - **`/painel/configuracoes`**: "Página pública: /empresa/slug" virou link clicável (antes era só texto); card "Avaliação no Google" subiu pra logo depois de "Dados da empresa" (era depois de SEO); "SEO" e "Meta Pixel" agrupados sob um rótulo "Avançado / Marketing (opcional)".
 - Confirmado por leitura de código que o Meta Pixel já funciona de ponta a ponta (carrega na página pública, dispara evento "Schedule" na confirmação) — não precisou de mudança, só validação.
 
+### 14. Sinal via PIX no agendamento (27-28/09/2026 — ⏳ falta migração em produção + deploy)
+- Recurso do **plano pago**, **desligado por padrão**: a empresa liga em Configurações → Agenda → "Sinal via PIX", cola a própria chave PIX, escolhe % ou valor fixo, prazo pra pagar, se libera o horário sozinho quando vence, e escreve a própria regra de devolução (mostrada ao cliente). Por serviço dá pra desmarcar "Exigir sinal".
+- Sem gateway: `src/lib/pix.ts` gera o BR Code estático (copia e cola, com valor e txid = id do agendamento; CRC validado contra o exemplo oficial do BCB) e o QR Code (lib `qrcode`) na página de confirmação. O dinheiro cai direto na conta da empresa, que confere no banco e clica **"Sinal recebido"** na agenda (`confirmDepositAction`) → agendamento vira CONFIRMADO.
+- Regras em `src/lib/deposit.ts`; campos `Appointment.depositCents/depositStatus (PENDING|PAID|EXPIRED)/depositDueAt`, `Service.requiresDeposit`, `CompanySettings.deposit*`. Sessão de pacote não cobra sinal. Agendamento manual pelo painel e vaga vinda da lista de espera também não.
+- Prazo vencido: `src/lib/deposit-expiry.ts` cancela e libera o horário (dispara WhatsApp de cancelamento + oferta pra lista de espera). Como o cron é diário (Hobby), isso roda também **sob demanda** ao listar horários, ao criar agendamento e ao abrir a agenda.
+- Limitação: o WhatsApp de confirmação é template aprovado pela Meta e **não** leva o código PIX — o cliente paga pela tela de confirmação. Levar o PIX no WhatsApp exigiria um template novo.
+- Testes: `src/lib/__tests__/pix-deposit.test.ts` e `tests/integration/deposit.test.ts` (5 cenários). `booking.test.ts`/`packages.test.ts` continuam com a falha intermitente conhecida (transação estoura o tempo em branch fria) — confirmado que falham igual no código anterior.
+
 ## Fila de ideias discutidas (não começadas)
 9. Stripe (preencher chaves reais) — deixado pro final de propósito. Único item técnico que sobrou da lista original.
 10. Prova social (depoimento de cliente real ou "X empresas usam") — combinado deixar pra quando tiver 1-2 clientes dispostos a dar depoimento; não inventar isso.
-11. **Cliente pagar sinal/valor na hora de agendar** (discutido em detalhe, não implementado) — hoje o sistema não cobra nada do cliente final, só do dono da empresa (assinatura). Decisão que ficou em aberto após discussão: a empresa **já tem meio de pagamento próprio** (PIX/maquininha) e não vai querer abrir conta em gateway novo (Asaas/Stripe) só pra isso — então a versão vencedora é PIX **estático**, usando a própria chave PIX que a empresa já usa no dia a dia (ela só cola a chave em Configurações, sem criar conta em lugar nenhum). Trade-off aceito: **sem confirmação automática** — a empresa (ou o cliente, mandando comprovante) confirma manualmente que caiu, o sistema não sabe sozinho. Se o usuário topar essa limitação, é a próxima a implementar; a alternativa com confirmação automática (cada empresa conectando a própria conta Asaas) foi descartada por exigir cadastro extra que a empresa provavelmente não vai querer fazer.
+11. ~~Cliente pagar sinal na hora de agendar~~ — **feito**, ver item 14.
 
 ## Credenciais e acessos configurados nesta sessão
 - **Meta/WhatsApp**: App "ReservaOn" (`1607109597782704`), WABA "Broken Ads" (`1446234654089281`), número +55 73 9903-8551. Token renovado automaticamente (ver acima).

@@ -7,6 +7,7 @@ export const serviceSchema = z.object({
   durationMinutes: z.coerce.number().int().min(5, "Duração mínima de 5 minutos."),
   imageUrl: z.string().trim().url("Informe uma URL de imagem válida.").optional().or(z.literal("")),
   isActive: z.boolean().default(true),
+  requiresDeposit: z.boolean().default(true),
   professionalIds: z.array(z.string()).min(1, "Selecione ao menos um profissional."),
 });
 

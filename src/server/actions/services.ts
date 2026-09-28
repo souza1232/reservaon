@@ -30,6 +30,7 @@ export async function createServiceAction(input: unknown): Promise<ActionResult<
       durationMinutes: data.durationMinutes,
       imageUrl: data.imageUrl || null,
       isActive: data.isActive,
+      requiresDeposit: data.requiresDeposit,
       professionals: {
         create: data.professionalIds.map((professionalId) => ({ professionalId })),
       },
@@ -74,6 +75,7 @@ export async function updateServiceAction(
         durationMinutes: data.durationMinutes,
         imageUrl: data.imageUrl || null,
         isActive: data.isActive,
+        requiresDeposit: data.requiresDeposit,
         professionals: {
           create: data.professionalIds.map((professionalId) => ({ professionalId })),
         },

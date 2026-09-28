@@ -79,6 +79,7 @@ export default async function ServicesPage() {
                           durationMinutes: service.durationMinutes,
                           imageUrl: service.imageUrl,
                           isActive: service.isActive,
+                          requiresDeposit: service.requiresDeposit,
                           professionalIds: service.professionals.map((p) => p.professionalId),
                         }}
                       />
