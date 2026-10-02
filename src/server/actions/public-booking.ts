@@ -7,7 +7,6 @@ import { publicBookingSchema } from "@/lib/validations/appointment";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { notifyAppointmentByWhatsapp } from "@/lib/appointment-notifications";
 import { tryConsumePackageSession } from "@/lib/package-consumption";
-import { syncAppointmentToGoogleCalendar } from "@/lib/appointment-google-sync";
 import { requiredDepositCents, depositDueAt } from "@/lib/deposit";
 import { expireOverdueDeposits } from "@/lib/deposit-expiry";
 import { actionError, actionSuccess, type ActionResult } from "./types";
@@ -178,7 +177,6 @@ export async function createPublicAppointmentAction(
     );
 
     void notifyAppointmentByWhatsapp(appointment.id, "CONFIRMATION");
-    void syncAppointmentToGoogleCalendar(appointment.id, "upsert");
     return actionSuccess({ appointmentId: appointment.id });
   } catch (error) {
     if (error instanceof AvailabilityError) return actionError(error.message);

@@ -22,14 +22,6 @@ function areaForRole(role?: string): string {
   return "/entrar";
 }
 
-// /painel, /admin e /profissional ainda não são localizados (fase 2) — essa
-// função ignora um eventual prefixo de idioma nessas áreas, mas hoje elas
-// nunca são acessadas com prefixo.
-function stripLocalePrefix(pathname: string): string {
-  const match = pathname.match(/^\/(en|es)(\/.*|$)/);
-  return match ? match[2] || "/" : pathname;
-}
-
 const NON_LOCALIZED_PAGES = [
   "/esqueci-senha",
   "/redefinir-senha",
@@ -38,7 +30,7 @@ const NON_LOCALIZED_PAGES = [
 
 export default auth((req) => {
   const { nextUrl } = req;
-  const path = stripLocalePrefix(nextUrl.pathname);
+  const path = nextUrl.pathname;
   const isLoggedIn = !!req.auth?.user;
   const role = req.auth?.user?.role;
 

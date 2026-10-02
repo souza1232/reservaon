@@ -6,9 +6,6 @@ import { formatDateShort, formatTime } from "@/lib/format";
 import { assertSlotAvailable, AvailabilityError } from "@/lib/availability";
 import { tryConsumePackageSession, creditBackPackageSession } from "@/lib/package-consumption";
 import { notifyReviewRequest } from "@/lib/appointment-notifications";
-import { syncAppointmentToGoogleCalendar } from "@/lib/appointment-google-sync";
-import { isGoogleCalendarConfigured, listUpcomingEvents } from "@/lib/google-calendar";
-import { DEFAULT_COMPANY_SETTINGS } from "@/lib/constants";
 
 /**
  * Núcleo das mutações de confirmar/cancelar agendamento, sem exigir sessão
@@ -65,12 +62,6 @@ export async function cancelAppointmentCore(appointmentId: string): Promise<Muta
   if (appointment.customerPackageId) {
     await creditBackPackageSession(appointment.customerPackageId);
   }
-
-  // Chamada aqui (no núcleo) e não em cada chamador, porque cancelAppointmentCore
-  // é acionada tanto pela server action do painel quanto pelo webhook do
-  // WhatsApp (botão "Cancelar" do lembrete) — os dois precisam remover o
-  // evento espelhado no Google Agenda do profissional.
-  void syncAppointmentToGoogleCalendar(appointmentId, "delete");
 
   return { outcome: "ok", appointment: updated };
 }
@@ -208,7 +199,6 @@ export async function claimWaitlistEntry(entryId: string): Promise<WaitlistClaim
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
 
-    void syncAppointmentToGoogleCalendar(appointment.id, "upsert");
     return { outcome: "ok", appointment };
   } catch (error) {
     if (
@@ -269,96 +259,4 @@ export async function autoCompleteDueAppointments(): Promise<{ completed: number
   }
 
   return { completed: due.length };
-}
-
-/**
- * Sentido "pull" da sincronização com o Google Agenda — chamada 1x por dia
- * pelo mesmo cron diário (ver src/app/api/cron/whatsapp-reminders/route.ts,
- * mesma restrição de plano Hobby já aceita nas features anteriores). Pra
- * cada profissional conectado, lista os eventos futuros do Google (já
- * filtrando os que o próprio ReservaOn criou via push — ver
- * APPOINTMENT_MARKER_KEY em src/lib/google-calendar.ts) e mantém um
- * BlockedTime espelhado por evento, casando por `googleEventId`: cria o que
- * é novo, atualiza horário se mudou, e remove o que sumiu da agenda do
- * Google (evento apagado ou movido) — nunca mexe num bloqueio já no
- * passado. Bloqueios criados manualmente pela empresa (`googleEventId`
- * nulo) nunca são tocados aqui.
- */
-export async function syncGoogleCalendarBlocks(): Promise<{ synced: number }> {
-  if (!isGoogleCalendarConfigured()) return { synced: 0 };
-
-  const connections = await prisma.googleCalendarConnection.findMany({
-    include: { professional: { include: { company: { include: { settings: true } } } } },
-  });
-
-  let synced = 0;
-  const now = new Date();
-
-  for (const connection of connections) {
-    try {
-      const settings = connection.professional.company.settings;
-      const maxFutureDays = settings?.maxFutureDays ?? DEFAULT_COMPANY_SETTINGS.maxFutureDays;
-      const timeMax = new Date(now.getTime() + maxFutureDays * 24 * 60 * 60 * 1000);
-
-      const events = await listUpcomingEvents({ connection, timeMin: now, timeMax });
-      const eventIds = new Set(events.map((e) => e.id));
-
-      const existingBlocks = await prisma.blockedTime.findMany({
-        where: { professionalId: connection.professionalId, googleEventId: { not: null } },
-      });
-      const existingByEventId = new Map(existingBlocks.map((b) => [b.googleEventId, b]));
-
-      for (const event of events) {
-        const existing = existingByEventId.get(event.id);
-        if (!existing) {
-          await prisma.blockedTime.create({
-            data: {
-              companyId: connection.professional.companyId,
-              professionalId: connection.professionalId,
-              scope: "SPECIFIC_TIME",
-              startAt: event.startAt,
-              endAt: event.endAt,
-              reason: "Sincronizado do Google Agenda",
-              googleEventId: event.id,
-            },
-          });
-        } else if (
-          existing.startAt.getTime() !== event.startAt.getTime() ||
-          existing.endAt.getTime() !== event.endAt.getTime()
-        ) {
-          await prisma.blockedTime.update({
-            where: { id: existing.id },
-            data: { startAt: event.startAt, endAt: event.endAt },
-          });
-        }
-        synced++;
-      }
-
-      const staleBlockIds = existingBlocks
-        .filter(
-          (b) =>
-            b.googleEventId &&
-            !eventIds.has(b.googleEventId) &&
-            b.startAt.getTime() > now.getTime(),
-        )
-        .map((b) => b.id);
-      if (staleBlockIds.length > 0) {
-        await prisma.blockedTime.deleteMany({ where: { id: { in: staleBlockIds } } });
-      }
-
-      await prisma.googleCalendarConnection.update({
-        where: { id: connection.id },
-        data: { lastSyncedAt: now },
-      });
-    } catch (error) {
-      // Uma conexão com token revogado ou erro de rede não pode travar a
-      // sincronização das outras — segue pro próximo profissional.
-      console.error(
-        `[google-calendar-sync] falha ao sincronizar bloqueios do profissional ${connection.professionalId}:`,
-        error,
-      );
-    }
-  }
-
-  return { synced };
 }

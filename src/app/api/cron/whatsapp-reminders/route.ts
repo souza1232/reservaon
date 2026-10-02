@@ -4,7 +4,6 @@ import { notifyAppointmentByWhatsapp } from "@/lib/appointment-notifications";
 import {
   offerNextWaitlistEntry,
   autoCompleteDueAppointments,
-  syncGoogleCalendarBlocks,
 } from "@/lib/appointment-mutations";
 import { expireOverdueDeposits } from "@/lib/deposit-expiry";
 
@@ -23,9 +22,7 @@ import { expireOverdueDeposits } from "@/lib/deposit-expiry";
  * espera vencidas (ninguém respondeu "Confirmar"/"Não, obrigado" a tempo) e
  * avançar pro próximo da fila, pra auto-concluir agendamentos cujo horário
  * já passou (disparando o pedido de avaliação no Google — ver
- * autoCompleteDueAppointments em src/lib/appointment-mutations.ts), e pro
- * sentido "pull" da sincronização com o Google Agenda dos profissionais
- * conectados (ver syncGoogleCalendarBlocks, mesmo arquivo) — em vez de criar
+ * autoCompleteDueAppointments em src/lib/appointment-mutations.ts) — em vez de criar
  * mais crons, que o plano Hobby não permitiria rodar com mais frequência
  * mesmo assim.
  */
@@ -68,13 +65,11 @@ export async function GET(request: Request) {
 
   const { expired: depositsExpired } = await expireOverdueDeposits();
   const { completed: autoCompleted } = await autoCompleteDueAppointments();
-  const { synced: googleSynced } = await syncGoogleCalendarBlocks();
 
   return NextResponse.json({
     processed: appointments.length,
     waitlistExpired: expiredOffers.length,
     autoCompleted,
-    googleSynced,
     depositsExpired,
   });
 }

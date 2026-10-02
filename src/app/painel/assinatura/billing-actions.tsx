@@ -14,35 +14,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  createCheckoutSessionAction,
-  createBillingPortalSessionAction,
   createAsaasSubscriptionAction,
   createAsaasCardCheckoutAction,
   getSubscriptionStatusAction,
 } from "@/server/actions/billing";
-
-export function UpgradeButton({ planId, label }: { planId: string; label: string }) {
-  const [loading, setLoading] = useState(false);
-
-  return (
-    <Button
-      className="w-full"
-      disabled={loading}
-      onClick={async () => {
-        setLoading(true);
-        const result = await createCheckoutSessionAction(planId);
-        setLoading(false);
-        if (!result.success || !result.data) {
-          toast.error(result.message ?? "Não foi possível iniciar o checkout.");
-          return;
-        }
-        window.location.href = result.data.url;
-      }}
-    >
-      {loading ? "Abrindo checkout..." : label}
-    </Button>
-  );
-}
 
 type PixStep = "closed" | "document" | "loading" | "qrcode" | "confirmed";
 
@@ -296,28 +271,5 @@ export function AsaasCardButton({
         </DialogContent>
       </Dialog>
     </>
-  );
-}
-
-export function ManageBillingButton() {
-  const [loading, setLoading] = useState(false);
-
-  return (
-    <Button
-      variant="outline"
-      disabled={loading}
-      onClick={async () => {
-        setLoading(true);
-        const result = await createBillingPortalSessionAction();
-        setLoading(false);
-        if (!result.success || !result.data) {
-          toast.error(result.message ?? "Não foi possível abrir o portal de cobrança.");
-          return;
-        }
-        window.location.href = result.data.url;
-      }}
-    >
-      {loading ? "Abrindo..." : "Gerenciar cobrança"}
-    </Button>
   );
 }

@@ -2,7 +2,6 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Logo } from "./logo";
 import { Button } from "@/components/ui/button";
-import { LanguageSwitcher } from "./language-switcher";
 
 export async function SiteHeader() {
   const t = await getTranslations("Nav");
@@ -26,7 +25,6 @@ export async function SiteHeader() {
           </a>
         </nav>
         <div className="flex items-center gap-1 sm:gap-2">
-          <LanguageSwitcher />
           <Button variant="ghost" asChild>
             <Link href="/entrar">{t("entrar")}</Link>
           </Button>

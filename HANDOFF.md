@@ -45,7 +45,7 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 - Hosts de imagem: **mantido como está** de propósito — restringir a uma lista fixa quebraria empresas colando o link do próprio logo de qualquer lugar (não há vulnerabilidade real aqui, o Next.js já faz proxy seguro de qualquer imagem https).
 
 ### 3. Cobrança da assinatura da plataforma (empresa paga a gente)
-- **Stripe**: código pronto (inclusive botão de cartão já funcional na UI), mas **as chaves nunca foram preenchidas** e o produto/preço do plano está em **modo teste** do Stripe — decisão consciente de não mexer, consolidar tudo em Asaas em vez disso (ver item 12).
+- **Stripe**: **removido em 01/10/2026** (nunca foi ligado; tudo é pelo Asaas). Código, webhook `/api/webhooks/stripe`, botões e a dependência `stripe` foram apagados. As colunas `Plan.stripeProductId/stripePriceId` continuam no banco, sem uso.
 - **Asaas (PIX)**: código pronto e testado, credenciais reais existem no `.env` local — mas ⚠️ **confirmado nesta sessão que as env vars estão vazias na Vercel produção**, então na prática ninguém conseguiu assinar de verdade até isso ser corrigido (ver pendência urgente no topo deste arquivo). Botão "Assinar com PIX" em `/painel/assinatura` gera QR Code na hora, webhook confirma pagamento e ativa a assinatura sozinho — assim que as credenciais forem corrigidas na Vercel.
 - Plano Gratuito: 10 agendamentos/mês (era 30, reduzido de propósito pra empurrar conversão pro pago). Plano Profissional: R$49,90/mês.
 
@@ -66,16 +66,13 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 - ✅ Template `agendamento_pedido_avaliacao` foi **APROVADO** pela Meta — `WHATSAPP_TEMPLATE_REVIEW_REQUEST` já setado no `.env`/Vercel e reimplantado. Ativo em produção. ⚠️ Ficou categorizado como **MARKETING** (não UTILITY, que foi o que submetemos) — custa mais por mensagem e exige opt-in de marketing do cliente. Vale reconsiderar o texto no futuro pra tentar reclassificar como UTILITY, se o custo incomodar — decisão de negócio, não urgente.
 - Trade-off aceito conscientemente: um no-show também vira CONCLUÍDO sozinho (a empresa pode corrigir pra "Não compareceu" manualmente depois; o pedido de avaliação já vai ter sido disparado)
 
-### 7. Sincronização com Google Agenda
-- Cada profissional conecta a **própria** conta do Google em `/profissional/configuracoes` (não uma conta única da empresa)
-- **Dois sentidos**: agendamento do ReservaOn vira evento no Google Agenda do profissional (tempo real); e compromisso que o profissional criar direto no Google bloqueia aquele horário no ReservaOn (varredura 1x/dia, mesmo cron diário de sempre)
-- ⏳ **Pendente**: precisa criar um projeto no Google Cloud Console, ativar a Google Calendar API, configurar a tela de consentimento OAuth, e preencher `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` na Vercel (passo a passo completo no `.env.example`). Sem isso, a tela de conexão mostra "ainda não configurado" e nada quebra.
-- Limitação aceita: só profissional com login próprio (`Professional.userId` preenchido) consegue conectar — quem não tem conta de usuário fica de fora por enquanto.
+### 7. ~~Sincronização com Google Agenda~~ — **removida em 01/10/2026**
+- Decisão de produto ("tirar o que é frescura"): nunca foi ativada (faltava configurar o Google Cloud), dava manutenção e o dono pequeno não pede. Código, rotas `/api/integrations/google-calendar/*`, página `/profissional/configuracoes`, sync no cron e a dependência `googleapis` foram apagados. **O banco foi mantido de propósito** (`GoogleCalendarConnection`, `Appointment.googleEventId`, `BlockedTime.googleEventId` continuam no schema, sem uso) — dá pra remover numa migração futura se quiser.
 
 ### 8. Página institucional e credibilidade
 - `/sobre` — missão, visão, valores e política de atendimento do ReservaOn (a plataforma, não uma empresa cliente)
 - Rodapé e `/sobre` mostram um canal de suporte real por WhatsApp (`(73) 99903-2652`) e o CNPJ (`66.173.608/0001-26`) — sinais de confiança pra quem avalia assinar
-- Linkado no rodapé em pt/en/es
+- Linkado no rodapé. (Versões em inglês/espanhol do site **removidas em 01/10/2026** — público é brasileiro; `next-intl` continua, só com `pt`.)
 
 ### 9. Relatórios (`/painel/relatorios`)
 - Página nova, separada do Dashboard (que continua igual, pra visão rápida do dia) — filtro de período (este mês, mês passado, últimos 30/90 dias, personalizado) via `PeriodSelector`, tudo por link/form GET, sem client JS
@@ -126,7 +123,7 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 - Testes: `src/lib/__tests__/pix-deposit.test.ts` e `tests/integration/deposit.test.ts` (5 cenários). `booking.test.ts`/`packages.test.ts` continuam com a falha intermitente conhecida (transação estoura o tempo em branch fria) — confirmado que falham igual no código anterior.
 
 ## Fila de ideias discutidas (não começadas)
-9. Stripe (preencher chaves reais) — deixado pro final de propósito. Único item técnico que sobrou da lista original.
+9. ~~Stripe~~ — descartado, código removido (tudo pelo Asaas).
 10. Prova social (depoimento de cliente real ou "X empresas usam") — combinado deixar pra quando tiver 1-2 clientes dispostos a dar depoimento; não inventar isso.
 11. ~~Cliente pagar sinal na hora de agendar~~ — **feito**, ver item 14.
 
@@ -185,5 +182,4 @@ mesmo sem o MCP.
   `prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --script`,
   colocar numa pasta nova em `prisma/migrations/<timestamp>_nome`, e aplicar
   com `prisma migrate deploy` (só aplica, nunca reseta).
-- `googleapis` (SDK oficial do Google) virou dependência nesta sessão, pra
-  sincronização com o Google Agenda.
+- Testes de integração que criam agendamento (`booking`, `packages`, `deposit`) às vezes falham com "Este horário acabou de ser reservado" rodando daqui (Brasil → Neon us-east): a transação Serializable estoura o tempo (P2028) e cai na mesma mensagem. Confirmado que acontece igual no código anterior. Em produção (Vercel e Neon na mesma região) não foi observado.

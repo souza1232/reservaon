@@ -8,7 +8,6 @@ import { assertSlotAvailable, getAvailableSlots, AvailabilityError } from "@/lib
 import { notifyAppointmentByWhatsapp } from "@/lib/appointment-notifications";
 import { cancelAppointmentCore, offerNextWaitlistEntry } from "@/lib/appointment-mutations";
 import { tryConsumePackageSession } from "@/lib/package-consumption";
-import { syncAppointmentToGoogleCalendar } from "@/lib/appointment-google-sync";
 import { expireOverdueDeposits } from "@/lib/deposit-expiry";
 import {
   manualAppointmentSchema,
@@ -146,7 +145,6 @@ export async function createManualAppointmentAction(
 
     revalidatePath("/painel/agenda");
     void notifyAppointmentByWhatsapp(appointment.id, "CONFIRMATION");
-    void syncAppointmentToGoogleCalendar(appointment.id, "upsert");
     return actionSuccess({ id: appointment.id });
   } catch (error) {
     if (error instanceof AvailabilityError) return actionError(error.message);
@@ -298,7 +296,6 @@ export async function rescheduleAppointmentAction(
     revalidatePath("/painel/agenda");
     revalidatePath("/profissional");
     void notifyAppointmentByWhatsapp(appointmentId, "RESCHEDULE");
-    void syncAppointmentToGoogleCalendar(appointmentId, "upsert");
     return actionSuccess();
   } catch (error) {
     if (error instanceof AvailabilityError) return actionError(error.message);

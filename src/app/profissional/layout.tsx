@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { CalendarDays, Users, Settings } from "lucide-react";
+import { CalendarDays, Users } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AppShell, type NavItem } from "@/components/dashboard/app-shell";
@@ -8,7 +8,6 @@ import { AppShell, type NavItem } from "@/components/dashboard/app-shell";
 const navItems: NavItem[] = [
   { href: "/profissional", label: "Minha agenda", icon: <CalendarDays className="h-4 w-4" />, exact: true },
   { href: "/profissional/clientes", label: "Meus clientes", icon: <Users className="h-4 w-4" /> },
-  { href: "/profissional/configuracoes", label: "Google Agenda", icon: <Settings className="h-4 w-4" /> },
 ];
 
 export default async function ProfissionalLayout({ children }: { children: ReactNode }) {

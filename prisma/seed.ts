@@ -41,18 +41,9 @@ async function main() {
     },
   });
 
-  // IDs reais criados no Stripe (modo teste) para a conta conectada a este projeto.
-  // Se você usar outra conta Stripe, gere seu próprio produto/preço e troque os IDs abaixo
-  // (ou apague-os para o plano ficar "sem cobrança online" até você configurar o seu).
-  const PROFISSIONAL_STRIPE_PRODUCT_ID = "prod_VGYQRQRDrGGrCG";
-  const PROFISSIONAL_STRIPE_PRICE_ID = "price_1UG1JvD2gMqIX6N5tzLsw5s4";
-
   const proPlan = await prisma.plan.upsert({
     where: { slug: "profissional" },
-    update: {
-      stripeProductId: PROFISSIONAL_STRIPE_PRODUCT_ID,
-      stripePriceId: PROFISSIONAL_STRIPE_PRICE_ID,
-    },
+    update: {},
     create: {
       name: "Profissional",
       slug: "profissional",
@@ -67,8 +58,6 @@ async function main() {
       ],
       isActive: true,
       isDefault: false,
-      stripeProductId: PROFISSIONAL_STRIPE_PRODUCT_ID,
-      stripePriceId: PROFISSIONAL_STRIPE_PRICE_ID,
     },
   });
 

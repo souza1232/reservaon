@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import { CheckCircle2 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { isStripeConfigured } from "@/lib/stripe";
 import { isAsaasConfigured } from "@/lib/asaas";
 import { formatCentsToBRL, formatDateShort } from "@/lib/format";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { UpgradeButton, ManageBillingButton, AsaasPixButton, AsaasCardButton } from "./billing-actions";
+import { AsaasPixButton, AsaasCardButton } from "./billing-actions";
 
 export const metadata: Metadata = { title: "Assinatura" };
 
@@ -37,7 +36,6 @@ export default async function BillingPage({ searchParams }: PageProps) {
     prisma.plan.findMany({ where: { isActive: true }, orderBy: { priceCents: "asc" } }),
   ]);
 
-  const stripeReady = isStripeConfigured();
   const asaasReady = isAsaasConfigured();
 
   return (
@@ -59,14 +57,12 @@ export default async function BillingPage({ searchParams }: PageProps) {
           <AlertDescription>Checkout cancelado — nenhuma cobrança foi feita.</AlertDescription>
         </Alert>
       )}
-      {/* Só avisa quando nenhum meio de pagamento funciona — com o Asaas ativo,
-          o aviso do Stripe assustava o cliente à toa. */}
-      {!stripeReady && !asaasReady && (
+      {!asaasReady && (
         <Alert variant="destructive">
           <AlertDescription>
-            Cobrança online ainda não configurada nesta instalação (faltam as variáveis do
-            Asaas ou do Stripe). Os planos abaixo ficam visíveis, mas o botão de upgrade não
-            funciona até isso ser configurado.
+            Cobrança online ainda não configurada nesta instalação (falta a chave do Asaas).
+            Os planos abaixo ficam visíveis, mas o botão de assinar não funciona até isso ser
+            configurado.
           </AlertDescription>
         </Alert>
       )}
@@ -92,11 +88,6 @@ export default async function BillingPage({ searchParams }: PageProps) {
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Próxima renovação</span>
               <span className="font-medium">{formatDateShort(company.subscription.renewalDate)}</span>
-            </div>
-          )}
-          {company.subscription?.externalCustomerId && (
-            <div className="pt-2">
-              <ManageBillingButton />
             </div>
           )}
         </CardContent>
@@ -130,9 +121,6 @@ export default async function BillingPage({ searchParams }: PageProps) {
                 </ul>
                 {!isCurrent && plan.priceCents > 0 && (
                   <div className="space-y-2">
-                    {plan.stripePriceId && stripeReady && (
-                      <UpgradeButton planId={plan.id} label={`Assinar ${plan.name} (cartão)`} />
-                    )}
                     {asaasReady && (
                       <AsaasPixButton
                         planId={plan.id}
@@ -147,7 +135,7 @@ export default async function BillingPage({ searchParams }: PageProps) {
                         hasDocument={Boolean(company.cnpj)}
                       />
                     )}
-                    {!stripeReady && !asaasReady && (
+                    {!asaasReady && (
                       <p className="text-xs text-muted-foreground">
                         Cobrança online indisponível no momento para este plano.
                       </p>

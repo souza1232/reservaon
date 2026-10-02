@@ -2,7 +2,6 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireCompanyAdmin } from "@/lib/guards";
-import { getStripeClient, isStripeConfigured } from "@/lib/stripe";
 import {
   isAsaasConfigured,
   createAsaasCustomer,
@@ -17,90 +16,6 @@ import { actionError, actionSuccess, type ActionResult } from "./types";
 
 function appUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-}
-
-/** Cria uma sessão do Stripe Checkout para assinar/trocar de plano pago. */
-export async function createCheckoutSessionAction(
-  planId: string,
-): Promise<ActionResult<{ url: string }>> {
-  const session = await requireCompanyAdmin();
-
-  if (!isStripeConfigured()) {
-    return actionError(
-      "Pagamentos ainda não configurados nesta instalação (falta STRIPE_SECRET_KEY).",
-    );
-  }
-
-  const plan = await prisma.plan.findUnique({ where: { id: planId } });
-  if (!plan || !plan.isActive) return actionError("Plano inválido.");
-  if (!plan.stripePriceId) {
-    return actionError("Este plano ainda não está configurado para cobrança online.");
-  }
-
-  const company = await prisma.company.findUnique({
-    where: { id: session.user.companyId },
-    include: { subscription: true },
-  });
-  if (!company) return actionError("Empresa não encontrada.");
-
-  const stripe = getStripeClient();
-
-  try {
-    let customerId = company.subscription?.externalCustomerId ?? undefined;
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: company.email,
-        name: company.name,
-        metadata: { companyId: company.id },
-      });
-      customerId = customer.id;
-    }
-
-    const checkoutSession = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      customer: customerId,
-      line_items: [{ price: plan.stripePriceId, quantity: 1 }],
-      success_url: `${appUrl()}/painel/assinatura?status=sucesso`,
-      cancel_url: `${appUrl()}/painel/assinatura?status=cancelado`,
-      metadata: { companyId: company.id, planId: plan.id },
-      subscription_data: { metadata: { companyId: company.id, planId: plan.id } },
-    });
-
-    if (!checkoutSession.url) {
-      return actionError("Não foi possível iniciar o checkout.");
-    }
-
-    return actionSuccess({ url: checkoutSession.url });
-  } catch {
-    return actionError("Não foi possível iniciar o checkout com o Stripe.");
-  }
-}
-
-/** Cria uma sessão do Portal do Cliente Stripe (gerenciar cartão, cancelar, ver faturas). */
-export async function createBillingPortalSessionAction(): Promise<ActionResult<{ url: string }>> {
-  const session = await requireCompanyAdmin();
-
-  if (!isStripeConfigured()) {
-    return actionError("Pagamentos ainda não configurados nesta instalação.");
-  }
-
-  const subscription = await prisma.subscription.findUnique({
-    where: { companyId: session.user.companyId },
-  });
-  if (!subscription?.externalCustomerId) {
-    return actionError("Esta empresa ainda não possui uma assinatura paga ativa.");
-  }
-
-  const stripe = getStripeClient();
-  try {
-    const portalSession = await stripe.billingPortal.sessions.create({
-      customer: subscription.externalCustomerId,
-      return_url: `${appUrl()}/painel/assinatura`,
-    });
-    return actionSuccess({ url: portalSession.url });
-  } catch {
-    return actionError("Não foi possível abrir o portal de cobrança.");
-  }
 }
 
 function normalizeCpfCnpj(raw: string): string {
