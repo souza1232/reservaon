@@ -124,6 +124,8 @@ Auditoria completa feita; os 3 pontos de risco "Alto" e os 5 itens de risco méd
 
 ## Fila de ideias discutidas (não começadas)
 9. ~~Stripe~~ — descartado, código removido (tudo pelo Asaas).
+12. **Comissão dos profissionais** (discutido 01/10/2026, não começado): % ou valor fixo por profissional (opcional por serviço), calculado sobre atendimentos CONCLUÍDOS no período, relatório pro dono com detalhamento. Decisões em aberto: profissional vê a própria comissão? botão "marcar como pago"? sessão de pacote conta?
+13. **Reativar cliente sumido** (discutido 02/10/2026, não começado): campo opcional por serviço "chamar de volta em X dias"; WhatsApp 1x quando passa o prazo e o cliente não tem horário futuro; desligado por padrão; métrica de quantos voltaram. Exige template de **marketing** aprovado pela Meta (mais caro por mensagem). **Usuário decidiu esperar o primeiro cliente antes de fazer isso e a comissão.**
 10. Prova social (depoimento de cliente real ou "X empresas usam") — combinado deixar pra quando tiver 1-2 clientes dispostos a dar depoimento; não inventar isso.
 11. ~~Cliente pagar sinal na hora de agendar~~ — **feito**, ver item 14.
 
