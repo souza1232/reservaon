@@ -59,12 +59,14 @@ export default async function BillingPage({ searchParams }: PageProps) {
           <AlertDescription>Checkout cancelado — nenhuma cobrança foi feita.</AlertDescription>
         </Alert>
       )}
-      {!stripeReady && (
+      {/* Só avisa quando nenhum meio de pagamento funciona — com o Asaas ativo,
+          o aviso do Stripe assustava o cliente à toa. */}
+      {!stripeReady && !asaasReady && (
         <Alert variant="destructive">
           <AlertDescription>
-            Cobrança online ainda não configurada nesta instalação (faltam as variáveis
-            STRIPE_SECRET_KEY / STRIPE_PUBLISHABLE_KEY / STRIPE_WEBHOOK_SECRET). Os planos abaixo
-            ficam visíveis, mas o botão de upgrade não funciona até isso ser configurado.
+            Cobrança online ainda não configurada nesta instalação (faltam as variáveis do
+            Asaas ou do Stripe). Os planos abaixo ficam visíveis, mas o botão de upgrade não
+            funciona até isso ser configurado.
           </AlertDescription>
         </Alert>
       )}
