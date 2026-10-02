@@ -12,13 +12,12 @@
 2. Empresa com CPF/CNPJ já salvo recebia "CPF inválido" (a tela manda `""`) — agora usa o documento salvo.
 3. Asaas Checkout exige telefone + endereço completo do cliente — cliente agora é criado/atualizado com telefone (da empresa) e endereço (diálogo de cartão pede CEP, rua, número, bairro). Mínimo do Asaas por cobrança: R$5.
 
-⏳ **Falta (bloqueado pela trava de segurança, precisa rodar manualmente ou aprovar):**
-- O teste acabou sendo pago na empresa `clinicasdospes` (`cmu3e6kko0001kz04ob0pyfvm`), não na de teste: devolver a assinatura dela pra `TRIAL` no plano Gratuito (`cmu32s2ae0000v4m4jt3jhfk6`), `renewalDate` 2026-09-30T00:58:20Z, campos `external*` nulos — **antes** de cancelar no Asaas (senão o webhook de cancelamento bloqueia a empresa).
-- Depois, cancelar a assinatura `sub_zljdij404kj1ftr2` no Asaas (R$5/mês) e, se quiser, estornar os R$5.
-- Apagar: empresa `QA Cartao Temp` (`cmuj24jz20002v4b0nqvoxoqm`) + login `qa-admin-cartao-1790467507159@example.com`, e plano `Teste Cartao R$5` (`cmuj24ja30000v4b0uh8olrvv`) — este aparece pra todas as empresas em `/painel/assinatura`.
+✅ **Limpeza feita (01/10/2026)**: clinicasdospes voltou pro Gratuito (TRIAL), assinatura de R$5 cancelada no Asaas, empresa/login/plano de teste apagados. E-mail do site funcionando via Gmail `reservaoncontato@gmail.com` (senha de app), remetente "ReservaOn". Aviso vermelho do Stripe em /painel/assinatura agora só aparece se nem Asaas nem Stripe estiverem configurados.
+
+⏳ **Pendente:**
 - **Conta Asaas no CNPJ (em andamento, 27/09/2026)**: a conta Asaas atual é pessoa física, por isso o checkout/fatura mostra "Jesus Souza e Sousa" em vez de "ReservaOn" (não dá pra trocar via API). Plano: abrir conta Asaas PJ no CNPJ 66.173.608/0001-26 com nome fantasia "ReservaOn", usando o e-mail da empresa criado pra isso: `reservaoncontato@gmail.com`. Quando aprovada: trocar `ASAAS_API_KEY`/`ASAAS_WEBHOOK_TOKEN` na Vercel, registrar webhook na conta nova, reenviar logo (`/myAccount/paymentCheckoutConfig` — na conta atual já foi enviado e aprovado) e testar. Esse Gmail também pode servir pro envio de e-mail do site (senha de app → `EMAIL_SERVER_*`).
-- E-mail nunca foi configurado (`EMAIL_SERVER_HOST/USER/PASSWORD` vazios até no `.env`) — por isso a verificação de e-mail no cadastro está sendo pulada em produção.
-- Ajuste pequeno pendente: a faixa vermelha "Stripe não configurado" em `/painel/assinatura` aparece mesmo com Asaas funcionando — mostrar só se nenhum meio de pagamento estiver configurado.
+- Trocar a senha do banco Neon (apareceu num log da conversa de 28/09) e atualizar `.env` + Vercel.
+- Testar o sinal via PIX de ponta a ponta numa empresa real (QR no app do banco).
 
 ## Status geral
 Tudo abaixo está **implementado e testado**, exceto onde marcado "⏳ pendente" ou "⚠️". Cada funcionalidade grande foi feita com um plano técnico aprovado antes de codar — os planos ficam em `C:\Users\Desktop\.claude\plans\` (`jiggly-toasting-swing.md` = Pacote de sessões; `fancy-swimming-waffle.md` = Pedido de avaliação no Google + Sincronização com Google Agenda, nessa ordem — o mesmo arquivo foi reaproveitado pras duas por serem consecutivas na mesma sessão; `refactored-brewing-moonbeam.md` = Prontuário/histórico clínico, depois Papel de recepcionista, depois Checkout de cartão via Asaas — reaproveitado 3x por serem consecutivos na mesma sessão).
