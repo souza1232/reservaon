@@ -1,51 +1,41 @@
 import type { Metadata } from "next";
-import { Building2, Users, CalendarCheck, Wallet, ShieldCheck, ShieldX } from "lucide-react";
+import { Building2, Wallet, Gift } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCentsToBRL } from "@/lib/format";
 import { StatCard } from "@/components/dashboard/stat-card";
 
 export const metadata: Metadata = { title: "Admin — Dashboard" };
 
+// A empresa de demonstração da home não é cliente de verdade.
+const DEMO_COMPANY_SLUG = "clinica-exemplo";
+
+/**
+ * Painel do dono do ReservaOn, de propósito enxuto: quantos clientes
+ * (empresas) pagam, quantos estão no grátis e quanto entra por mês.
+ */
 export default async function AdminDashboardPage() {
-  const [
-    totalCompanies,
-    activeCompanies,
-    blockedCompanies,
-    totalUsers,
-    totalAppointments,
-    activeSubscriptions,
-  ] = await Promise.all([
-    prisma.company.count(),
-    prisma.company.count({ where: { status: "ACTIVE" } }),
-    prisma.company.count({ where: { status: "BLOCKED" } }),
-    prisma.user.count(),
-    prisma.appointment.count(),
+  const [paying, totalCompanies] = await Promise.all([
     prisma.subscription.findMany({
-      where: { status: "ACTIVE" },
-      include: { plan: true },
+      where: {
+        status: "ACTIVE",
+        plan: { priceCents: { gt: 0 } },
+        company: { slug: { not: DEMO_COMPANY_SLUG } },
+      },
+      select: { plan: { select: { priceCents: true } } },
     }),
+    prisma.company.count({ where: { slug: { not: DEMO_COMPANY_SLUG } } }),
   ]);
 
-  const monthlyRevenueCents = activeSubscriptions.reduce((sum, sub) => sum + sub.plan.priceCents, 0);
+  const monthlyRevenueCents = paying.reduce((sum, sub) => sum + sub.plan.priceCents, 0);
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard da plataforma</h1>
-        <p className="text-sm text-muted-foreground">Visão geral de todas as empresas do ReservaOn.</p>
-      </div>
+      <h1 className="text-2xl font-semibold tracking-tight">Seus clientes</h1>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard label="Empresas cadastradas" value={totalCompanies} icon={Building2} />
-        <StatCard label="Empresas ativas" value={activeCompanies} icon={ShieldCheck} />
-        <StatCard label="Empresas bloqueadas" value={blockedCompanies} icon={ShieldX} />
-        <StatCard label="Usuários" value={totalUsers} icon={Users} />
-        <StatCard label="Agendamentos (total)" value={totalAppointments} icon={CalendarCheck} />
-        <StatCard
-          label="Receita recorrente estimada (MRR)"
-          value={formatCentsToBRL(monthlyRevenueCents)}
-          icon={Wallet}
-        />
+      <div className="grid gap-4 sm:grid-cols-3">
+        <StatCard label="Clientes pagando" value={paying.length} icon={Building2} />
+        <StatCard label="No plano grátis" value={totalCompanies - paying.length} icon={Gift} />
+        <StatCard label="Você recebe por mês" value={formatCentsToBRL(monthlyRevenueCents)} icon={Wallet} />
       </div>
     </div>
   );
